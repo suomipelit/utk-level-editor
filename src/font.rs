@@ -88,6 +88,7 @@ impl<'a, R: Renderer<'a>> Font<'a, R> {
                 let glyph = &self.glyphs[c - INDEX_OFFSET];
                 renderer.render_texture(
                     &glyph.texture,
+                    None,
                     Rect::new(
                         x,
                         y,

@@ -1,6 +1,6 @@
 use std::cmp;
 
-use crate::render::Renderer;
+use crate::render::{Point, Renderer};
 use crate::types::Trigonometry;
 use crate::Graphics;
 
@@ -74,10 +74,10 @@ pub fn get_screen_coordinates_from_level_coordinates(
     graphics: &Graphics,
     coordinates: &(u32, u32),
     scroll: &(u32, u32),
-) -> (i32, i32) {
+) -> Point {
     let render_multiplier = graphics.render_multiplier;
     let render_size = graphics.get_render_size();
-    (
+    Point::new(
         (coordinates.0 * render_multiplier) as i32 - (scroll.0 * render_size) as i32,
         (coordinates.1 * render_multiplier) as i32 - (scroll.1 * render_size) as i32,
     )

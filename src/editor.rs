@@ -1,8 +1,8 @@
 use crate::event::{Event, Keycode, MouseButton};
-use crate::level::Steam;
+use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
 use crate::level::{CrateClass, StaticCrate};
-use crate::render::{Renderer, RendererColor};
+use crate::render::{Point, Rect, Renderer, RendererColor};
 use crate::types::GameType;
 use crate::util::*;
 use crate::Context;
@@ -527,13 +527,8 @@ impl EditorState {
     }
 
     pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<'a, R>) {
-        renderer.render_level(
-            &context.graphics,
-            &context.level,
-            &context.textures,
-            &context.trigonometry,
-            &context.font,
-        );
+        self.render_level(renderer, context);
+
         let highlighted_id = get_tile_id_from_coordinates(
             &context.graphics,
             &get_limited_screen_level_size(
@@ -625,6 +620,102 @@ impl EditorState {
         if let Some(text) = &context.saved_level_name {
             let (x, y) = get_bottom_text_position(context.graphics.resolution_y);
             context.font.render_text(renderer, text, (x, y));
+        }
+    }
+
+    fn render_level<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<'a, R>) {
+        renderer.clear_screen();
+        let level = &context.level;
+        let graphics = &context.graphics;
+        let textures = &context.textures;
+        let trigonometry = &context.trigonometry;
+        let render_size = context.graphics.get_render_size();
+
+        for y in 0..std::cmp::min(level.tiles.len() as u32, graphics.get_y_tiles_per_screen()) {
+            for x in 0..std::cmp::min(
+                level.tiles[y as usize].len() as u32,
+                graphics.get_x_tiles_per_screen(),
+            ) {
+                let (x_index, y_index) = get_scroll_corrected_indexes(level.scroll, x, y);
+                if y_index >= level.tiles.len() || x_index >= level.tiles[y_index].len() {
+                    continue;
+                }
+                let texture = match level.tiles[y_index][x_index].texture_type {
+                    TextureType::Floor => &textures.floor,
+                    TextureType::Walls => &textures.walls,
+                    TextureType::Shadow => unreachable!(),
+                };
+                let (texture_width, _) = R::get_texture_size(texture);
+                let src = get_block(
+                    level.tiles[y_index][x_index].id,
+                    texture_width,
+                    graphics.tile_size,
+                );
+                let (x_absolute, y_absolute) =
+                    get_absolute_coordinates_from_logical(x, y, graphics.get_render_size());
+                let dst = Rect::new(x_absolute, y_absolute, render_size, render_size);
+                renderer.render_texture(texture, Some(src), dst);
+                let (shadow_texture_width, _) = R::get_texture_size(&textures.shadows);
+                if level.tiles[y_index][x_index].shadow > 0 {
+                    let src = get_block(
+                        level.tiles[y_index][x_index].shadow - 1,
+                        shadow_texture_width,
+                        graphics.tile_size,
+                    );
+                    renderer.render_texture(&textures.shadows, Some(src), dst);
+                }
+            }
+        }
+        for (coordinates, spotlight) in &level.spotlights {
+            let center =
+                get_screen_coordinates_from_level_coordinates(graphics, coordinates, &level.scroll);
+            renderer.draw_circle(
+                center,
+                get_spotlight_render_radius(spotlight),
+                &RendererColor::Blue,
+            );
+        }
+        for (coordinates, steam) in &level.steams {
+            let center =
+                get_screen_coordinates_from_level_coordinates(graphics, coordinates, &level.scroll);
+            for x in 0..6 {
+                let multiplier = x as f32 * 6.0 * steam.range as f32;
+                renderer.draw_circle(
+                    Point::new(
+                        center.x + (trigonometry.sin[steam.angle as usize] * multiplier) as i32,
+                        center.y + (trigonometry.cos[steam.angle as usize] * multiplier) as i32,
+                    ),
+                    get_steam_render_radius() + x * 2,
+                    &RendererColor::Red,
+                );
+            }
+        }
+
+        for (coordinates, crate_item) in &level.crates.staticc {
+            let box_size = get_crate_render_size();
+            let pos =
+                get_screen_coordinates_from_level_coordinates(graphics, coordinates, &level.scroll);
+            let color = match crate_item.crate_variant {
+                StaticCrate::Normal => &RendererColor::LightGreen,
+                StaticCrate::Deathmatch => &RendererColor::LightBlue,
+            };
+            renderer.draw_rect(&Rect::new(pos.x, pos.y, box_size, box_size), color);
+            renderer.draw_rect(
+                &Rect::new(pos.x + 1, pos.y + 1, box_size - 2, box_size - 2),
+                color,
+            );
+
+            let text = match crate_item.crate_class {
+                CrateClass::Weapon => weapon_crates(),
+                CrateClass::Bullet => bullet_crates(),
+                CrateClass::Energy => energy_crates(),
+            }[crate_item.crate_type as usize];
+            let (_, height) = context.font.text_size(text);
+            context.font.render_text(
+                renderer,
+                text,
+                ((pos.x - 10) as u32, (pos.y - 9 - height as i32) as u32),
+            );
         }
     }
 
@@ -870,4 +961,9 @@ fn get_limited_screen_level_size(
         ),
         &(graphics.resolution_x, graphics.resolution_y),
     )
+}
+
+fn get_block(id: u32, width: u32, tile_size: u32) -> Rect {
+    let (x, y) = get_tile_coordinates(id, width, tile_size);
+    Rect::new(x as i32, y as i32, tile_size, tile_size)
 }
