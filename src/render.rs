@@ -223,38 +223,28 @@ impl<'a> Renderer<'a> for SdlRenderer {
         canvas.set_draw_color(get_sdl_color(color));
 
         // https://stackoverflow.com/a/48291620
-        let diameter: i32 = radius as i32 * 2;
-        let mut x: i32 = radius as i32 - 1;
-        let mut y: i32 = 0;
-        let mut tx: i32 = 1;
-        let mut ty: i32 = 1;
-        let mut error: i32 = tx - diameter;
+        let diameter = (radius * 2) as i32;
+        let mut x = (radius - 1) as i32;
+        let mut y = 0;
+        let mut tx = 1;
+        let mut ty = 1;
+        let mut error = tx - diameter;
 
         while x >= y {
-            canvas
-                .draw_point(Point::new(center.x + x, center.y - y))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x + x, center.y + y))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x - x, center.y - y))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x - x, center.y + y))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x + y, center.y - x))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x + y, center.y + x))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x - y, center.y - x))
-                .unwrap();
-            canvas
-                .draw_point(Point::new(center.x - y, center.y + x))
-                .unwrap();
+            for (cx, cy) in [
+                (x, -y),
+                (x, y),
+                (-x, -y),
+                (-x, y),
+                (y, -x),
+                (y, x),
+                (-y, -x),
+                (-y, x),
+            ] {
+                canvas
+                    .draw_point(Point::new(center.x + cx, center.y + cy))
+                    .unwrap();
+            }
 
             if error <= 0 {
                 y += 1;
