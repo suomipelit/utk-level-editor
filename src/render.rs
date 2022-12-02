@@ -5,7 +5,7 @@ use sdl2::render::TextureQuery;
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::surface::Surface;
 use sdl2::video::{Window, WindowContext};
-use std::cell::{RefCell, RefMut};
+use std::cell::RefCell;
 
 use crate::util::*;
 use crate::Graphics;
@@ -148,11 +148,7 @@ impl SdlRenderer {
     }
 
     pub fn present(&self) {
-        self.canvas_mut().present();
-    }
-
-    fn canvas_mut(&self) -> RefMut<Canvas<Window>> {
-        self.canvas.borrow_mut()
+        self.canvas.borrow_mut().present();
     }
 }
 
@@ -182,9 +178,9 @@ impl<'a> Renderer<'a> for SdlRenderer {
     }
 
     fn clear_screen(&self) {
-        self.canvas_mut()
-            .set_draw_color(get_sdl_color(&RendererColor::Black));
-        self.canvas_mut().clear();
+        let mut canvas = self.canvas.borrow_mut();
+        canvas.set_draw_color(get_sdl_color(&RendererColor::Black));
+        canvas.clear();
     }
 
     fn highlight_selected_tile(&self, graphics: &Graphics, id: u32, color: &RendererColor) {
@@ -204,7 +200,7 @@ impl<'a> Renderer<'a> for SdlRenderer {
     }
 
     fn draw_rect(&self, rect: &Rect, color: &RendererColor) {
-        let mut canvas = self.canvas_mut();
+        let mut canvas = self.canvas.borrow_mut();
         canvas.set_draw_color(get_sdl_color(color));
         canvas
             .draw_line(rect.top_left(), rect.bottom_left())
@@ -219,7 +215,7 @@ impl<'a> Renderer<'a> for SdlRenderer {
     }
 
     fn draw_circle(&self, center: Point, radius: u32, color: &RendererColor) {
-        let mut canvas = self.canvas_mut();
+        let mut canvas = self.canvas.borrow_mut();
         canvas.set_draw_color(get_sdl_color(color));
 
         // https://stackoverflow.com/a/48291620
@@ -261,13 +257,14 @@ impl<'a> Renderer<'a> for SdlRenderer {
     }
 
     fn render_texture(&self, texture: &Self::Texture, src: Option<Rect>, dst: Rect) {
-        self.canvas_mut()
+        self.canvas
+            .borrow_mut()
             .copy(texture, src.map(|r| r.into()), Some(dst.into()))
             .unwrap();
     }
 
     fn fill_and_render_texture(&self, color: RendererColor, texture: &Self::Texture, dst: Rect) {
-        let mut canvas = self.canvas_mut();
+        let mut canvas = self.canvas.borrow_mut();
         canvas.set_draw_color(get_sdl_color(&color));
         canvas.fill_rect(Some(dst.into())).unwrap();
         canvas.copy(texture, None, Some(dst.into())).unwrap();
@@ -279,7 +276,7 @@ impl<'a> Renderer<'a> for SdlRenderer {
     }
 
     fn window_size(&self) -> (u32, u32) {
-        self.canvas_mut().window().size()
+        self.canvas.borrow_mut().window().size()
     }
 }
 
