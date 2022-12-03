@@ -2,12 +2,12 @@ use sdl2::image::InitFlag;
 use sdl2::keyboard::TextInputUtil;
 use std::fs;
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 
 use crate::context::Context;
 use crate::context::Textures;
 use crate::context_util::{get_textures, resize};
-use crate::editor::EditorState;
+use crate::editor::{EditorState, LevelWriter};
 use crate::event::{Event, Keycode, MouseButton, WindowEvent};
 use crate::fn2::FN2;
 use crate::font::Font;
@@ -102,7 +102,7 @@ pub fn main() {
     let text_input = SdlTextInput(video_subsystem.text_input());
 
     let level_lister = DirectoryLevelLister::new();
-    let mut state = State::new(level_lister);
+    let mut state: State<DirectoryLevelLister, FileLevelWriter> = State::new(level_lister);
     loop {
         for sdl_event in event_pump.poll_iter() {
             if let Some(event) = convert_event(sdl_event) {
@@ -121,9 +121,9 @@ pub fn main() {
     }
 }
 
-struct State<L: LevelLister> {
+struct State<L: LevelLister, W: LevelWriter> {
     mode: Mode,
-    editor: EditorState,
+    editor: EditorState<W>,
     tile_select: TileSelectState,
     help: HelpState,
     general_level_info: GeneralLevelInfoState,
@@ -131,7 +131,7 @@ struct State<L: LevelLister> {
     load_level: LoadLevelState<L>,
 }
 
-impl<L: LevelLister> State<L> {
+impl<L: LevelLister, W: LevelWriter> State<L, W> {
     pub fn new(level_lister: L) -> Self {
         Self {
             mode: Mode::Editor,
@@ -330,5 +330,15 @@ impl LevelLister for DirectoryLevelLister {
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer).unwrap();
         buffer
+    }
+}
+
+struct FileLevelWriter;
+
+impl LevelWriter for FileLevelWriter {
+    fn write(level: &Level, filename: &str) {
+        let level_data = level.serialize();
+        let mut file = File::create(filename).unwrap();
+        file.write_all(&level_data).unwrap();
     }
 }

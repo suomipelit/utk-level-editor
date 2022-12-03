@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::event::{Event, Keycode, MouseButton};
 use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
@@ -56,7 +58,11 @@ enum InsertType {
     DMCrate(InsertState),
 }
 
-pub struct EditorState {
+pub trait LevelWriter {
+    fn write(level: &Level, filename: &str);
+}
+
+pub struct EditorState<W: LevelWriter> {
     set_position: u8,
     mouse_left_click: Option<(u32, u32)>,
     mouse_right_click: bool,
@@ -65,11 +71,12 @@ pub struct EditorState {
     new_level_size_x: String,
     new_level_size_y: String,
     drag_tiles: bool,
+    phantom: PhantomData<W>,
 }
 
 static DEFAULT_LEVEL_SIZE: (u32, u32) = (16, 12);
 
-impl EditorState {
+impl<W: LevelWriter> EditorState<W> {
     pub fn new() -> Self {
         EditorState {
             set_position: 0,
@@ -80,6 +87,7 @@ impl EditorState {
             new_level_size_x: DEFAULT_LEVEL_SIZE.0.to_string(),
             new_level_size_y: DEFAULT_LEVEL_SIZE.1.to_string(),
             drag_tiles: false,
+            phantom: PhantomData,
         }
     }
 
@@ -413,7 +421,7 @@ impl EditorState {
                         {
                             let level_save_name_uppercase = context.level_save_name.to_uppercase();
                             let level_saved_name = format!("{}.LEV", &level_save_name_uppercase);
-                            context.level.serialize(&level_saved_name).unwrap();
+                            W::write(&context.level, &level_saved_name);
                             text_input.stop();
                             context.saved_level_name = Some(level_saved_name.to_lowercase());
                             self.prompt = PromptType::None;

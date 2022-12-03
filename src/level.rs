@@ -1,6 +1,6 @@
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::collections::HashMap;
-use std::{fs::File, io::Write};
+use std::io::Write;
 
 use crate::types::*;
 use crate::util::*;
@@ -435,91 +435,90 @@ impl Level {
         }
     }
 
-    pub fn serialize(&self, filename: &str) -> std::io::Result<()> {
-        let mut file = File::create(filename)?;
-
-        file.write_all(&VERSION.to_le_bytes())
+    pub fn serialize(&self) -> Vec<u8> {
+        let mut data = Vec::new();
+        data.write_all(&VERSION.to_le_bytes())
             .expect("Failed to write version");
-        file.write_all(&(self.tiles[0].len() as u32).to_le_bytes())
+        data.write_all(&(self.tiles[0].len() as u32).to_le_bytes())
             .expect("Failed to write x size");
-        file.write_all(&(self.tiles.len() as u32).to_le_bytes())
+        data.write_all(&(self.tiles.len() as u32).to_le_bytes())
             .expect("Failed to write y size");
         for y in 0..(self.tiles.len()) {
             for x in 0..self.tiles[0].len() {
-                file.write_all(&(self.tiles[y][x].texture_type as u32).to_le_bytes())
+                data.write_all(&(self.tiles[y][x].texture_type as u32).to_le_bytes())
                     .expect("Failed to write block type");
-                file.write_all(&self.tiles[y][x].id.to_le_bytes())
+                data.write_all(&self.tiles[y][x].id.to_le_bytes())
                     .expect("Failed to write block num");
-                file.write_all(&self.tiles[y][x].shadow.to_le_bytes())
+                data.write_all(&self.tiles[y][x].shadow.to_le_bytes())
                     .expect("Failed to write block shadow");
             }
         }
 
-        file.write_all(&(self.p1_position.0).to_le_bytes())
+        data.write_all(&(self.p1_position.0).to_le_bytes())
             .expect("Failed to write p1 start x");
-        file.write_all(&(self.p1_position.1).to_le_bytes())
+        data.write_all(&(self.p1_position.1).to_le_bytes())
             .expect("Failed to write p1 start y");
-        file.write_all(&(self.p2_position.0).to_le_bytes())
+        data.write_all(&(self.p2_position.0).to_le_bytes())
             .expect("Failed to write p2 start x");
-        file.write_all(&(self.p2_position.1).to_le_bytes())
+        data.write_all(&(self.p2_position.1).to_le_bytes())
             .expect("Failed to write p2 start y");
 
-        file.write_all(&(self.spotlights.len() as u32).to_le_bytes())
+        data.write_all(&(self.spotlights.len() as u32).to_le_bytes())
             .expect("Failed to write spot amount");
 
         for (coordinates, spotlight) in &self.spotlights {
-            file.write_all(&coordinates.0.to_le_bytes())
+            data.write_all(&coordinates.0.to_le_bytes())
                 .expect("Failed to write spotlight x position");
-            file.write_all(&coordinates.1.to_le_bytes())
+            data.write_all(&coordinates.1.to_le_bytes())
                 .expect("Failed to write spotlight y position");
-            file.write_all(&(*spotlight as u32).to_le_bytes())
+            data.write_all(&(*spotlight as u32).to_le_bytes())
                 .expect("Failed to write spotlight intensity");
         }
 
-        file.write_all(&(self.steams.len() as u32).to_le_bytes())
+        data.write_all(&(self.steams.len() as u32).to_le_bytes())
             .expect("Failed to write steam amount");
 
         for (coordinates, steam) in &self.steams {
-            file.write_all(&coordinates.0.to_le_bytes())
+            data.write_all(&coordinates.0.to_le_bytes())
                 .expect("Failed to write steam x position");
-            file.write_all(&coordinates.1.to_le_bytes())
+            data.write_all(&coordinates.1.to_le_bytes())
                 .expect("Failed to write steam y position");
-            file.write_all(&(steam.angle as u32).to_le_bytes())
+            data.write_all(&(steam.angle as u32).to_le_bytes())
                 .expect("Failed to write steam angle");
-            file.write_all(&(steam.range as u32).to_le_bytes())
+            data.write_all(&(steam.range as u32).to_le_bytes())
                 .expect("Failed to write steam range");
         }
-        file.write_all(self.general_info.comment.as_bytes())
+        data.write_all(self.general_info.comment.as_bytes())
             .expect("Failed to write comment");
         for _ in 0..20 - self.general_info.comment.len() {
-            file.write_all(b"\0")
+            data.write_all(b"\0")
                 .expect("Failed to write comment padding");
         }
-        file.write_all(&self.general_info.time_limit.to_le_bytes())
+        data.write_all(&self.general_info.time_limit.to_le_bytes())
             .expect("Failed to write time limit");
         for enemy_amount in self.general_info.enemy_table {
-            file.write_all(&enemy_amount.to_le_bytes())
+            data.write_all(&enemy_amount.to_le_bytes())
                 .expect("Failed to write normal game enemies");
         }
         for weapon_amount in self.crates.random.normal.weapons {
-            file.write_all(&weapon_amount.to_le_bytes())
+            data.write_all(&weapon_amount.to_le_bytes())
                 .expect("Failed to write normal game weapons");
         }
         for bullet_amount in self.crates.random.normal.bullets {
-            file.write_all(&bullet_amount.to_le_bytes())
+            data.write_all(&bullet_amount.to_le_bytes())
                 .expect("Failed to write normal game bullets");
         }
-        file.write_all(&self.crates.random.normal.energy.to_le_bytes())
+        data.write_all(&self.crates.random.normal.energy.to_le_bytes())
             .expect("Failed to write normal game energy crates");
         for weapon_amount in self.crates.random.deathmatch.weapons {
-            file.write_all(&weapon_amount.to_le_bytes())
+            data.write_all(&weapon_amount.to_le_bytes())
                 .expect("Failed to write deathmatch game weapons");
         }
         for bullet_amount in self.crates.random.deathmatch.bullets {
-            file.write_all(&bullet_amount.to_le_bytes())
+            data.write_all(&bullet_amount.to_le_bytes())
                 .expect("Failed to write deathmatch game bullets");
         }
-        file.write_all(&self.crates.random.deathmatch.energy.to_le_bytes())
+        data.write_all(&self.crates.random.deathmatch.energy.to_le_bytes())
             .expect("Failed to write deathmatch game energy crates");
 
         let normal_static_crates: HashMap<Position, StaticCrateType> = self
@@ -529,16 +528,16 @@ impl Level {
             .into_iter()
             .filter(|(_coordinates, crate_item)| crate_item.crate_variant == StaticCrate::Normal)
             .collect();
-        file.write_all(&(normal_static_crates.len() as u32).to_le_bytes())
+        data.write_all(&(normal_static_crates.len() as u32).to_le_bytes())
             .expect("Failed to write normal game crate amount");
         for (coordinates, crate_item) in &normal_static_crates {
-            file.write_all(&(crate_item.crate_class as u32).to_le_bytes())
+            data.write_all(&(crate_item.crate_class as u32).to_le_bytes())
                 .expect("Failed to write normal game static crate class");
-            file.write_all(&(crate_item.crate_type as u32).to_le_bytes())
+            data.write_all(&(crate_item.crate_type as u32).to_le_bytes())
                 .expect("Failed to write normal game static crate type");
-            file.write_all(&coordinates.0.to_le_bytes())
+            data.write_all(&coordinates.0.to_le_bytes())
                 .expect("Failed to write normal game static crate x position");
-            file.write_all(&coordinates.1.to_le_bytes())
+            data.write_all(&coordinates.1.to_le_bytes())
                 .expect("Failed to write normal game static crate y position");
         }
 
@@ -551,20 +550,19 @@ impl Level {
                 crate_item.crate_variant == StaticCrate::Deathmatch
             })
             .collect();
-        file.write_all(&(deathmatch_static_crates.len() as u32).to_le_bytes())
+        data.write_all(&(deathmatch_static_crates.len() as u32).to_le_bytes())
             .expect("Failed to write deathmatch game crate amount");
         for (coordinates, crate_item) in &deathmatch_static_crates {
-            file.write_all(&(crate_item.crate_class as u32).to_le_bytes())
+            data.write_all(&(crate_item.crate_class as u32).to_le_bytes())
                 .expect("Failed to write deathmatch game static crate class");
-            file.write_all(&(crate_item.crate_type as u32).to_le_bytes())
+            data.write_all(&(crate_item.crate_type as u32).to_le_bytes())
                 .expect("Failed to write deathmatch game static crate type");
-            file.write_all(&coordinates.0.to_le_bytes())
+            data.write_all(&coordinates.0.to_le_bytes())
                 .expect("Failed to write deathmatch game static crate x position");
-            file.write_all(&coordinates.1.to_le_bytes())
+            data.write_all(&coordinates.1.to_le_bytes())
                 .expect("Failed to write deathmatch game static crate y position");
         }
-
-        Ok(())
+        data
     }
 
     pub fn origo(&self, render_size: u32) -> (i32, i32) {
