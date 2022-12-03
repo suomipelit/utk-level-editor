@@ -9,20 +9,16 @@ use std::time::Duration;
 
 use crate::render::SdlRenderer;
 use common::context::{Context, Textures};
-use common::editor::{EditorState, LevelWriter};
+use common::editor::LevelWriter;
 use common::event::{Event, Keycode, MouseButton, WindowEvent};
 use common::fn2::FN2;
 use common::font::Font;
-use common::general_level_info::GeneralLevelInfoState;
 use common::graphics::Graphics;
-use common::help::HelpState;
 use common::level::Level;
-use common::load_level::{LevelLister, LoadLevelState};
-use common::random_item_editor::RandomItemEditorState;
+use common::load_level::LevelLister;
 use common::render::Renderer;
-use common::tile_selector::TileSelectState;
-use common::types::*;
-use common::TextInput;
+use common::types::{TextureType, Trigonometry};
+use common::{RunState, State, TextInput};
 
 struct SdlTextInput(TextInputUtil);
 
@@ -98,78 +94,6 @@ pub fn main() {
         renderer.present();
         std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
-}
-
-struct State<L: LevelLister, W: LevelWriter> {
-    mode: Mode,
-    editor: EditorState<W>,
-    tile_select: TileSelectState,
-    help: HelpState,
-    general_level_info: GeneralLevelInfoState,
-    random_item_editor: RandomItemEditorState,
-    load_level: LoadLevelState<L>,
-}
-
-impl<L: LevelLister, W: LevelWriter> State<L, W> {
-    pub fn new(level_lister: L) -> Self {
-        Self {
-            mode: Mode::Editor,
-            editor: EditorState::new(),
-            tile_select: TileSelectState::new(),
-            help: HelpState::new(),
-            general_level_info: GeneralLevelInfoState::new(),
-            random_item_editor: RandomItemEditorState::new(),
-            load_level: LoadLevelState::new(level_lister),
-        }
-    }
-
-    pub fn handle_event<'a, R: Renderer<'a>, T: TextInput>(
-        &mut self,
-        context: &mut Context<'a, R>,
-        text_input: &T,
-        event: Event,
-    ) -> RunState {
-        let prev_mode = self.mode;
-        self.mode = match self.mode {
-            Mode::Editor => self.editor.handle_event(context, text_input, event),
-            Mode::TileSelect => self.tile_select.handle_event(context, event),
-            Mode::Help => self.help.handle_event(event),
-            Mode::GeneralLevelInfo => self
-                .general_level_info
-                .handle_event(context, text_input, event),
-            Mode::RandomItemEditor(game_mode) => self
-                .random_item_editor
-                .handle_event(context, text_input, game_mode, event),
-            Mode::LoadLevel => self.load_level.handle_event(context, event),
-            Mode::Quit => Mode::Quit,
-        };
-        if self.mode != prev_mode && self.mode == Mode::LoadLevel {
-            self.load_level.enter()
-        }
-        match self.mode {
-            Mode::Quit => RunState::Quit,
-            _ => RunState::Run,
-        }
-    }
-
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<'a, R>) {
-        match self.mode {
-            Mode::Editor => self.editor.render(renderer, context),
-            Mode::TileSelect => self.tile_select.render(renderer, context),
-            Mode::Help => self.help.render(renderer, context),
-            Mode::GeneralLevelInfo => self.general_level_info.render(renderer, context),
-            Mode::RandomItemEditor(game_type) => {
-                self.random_item_editor.render(renderer, context, game_type)
-            }
-            Mode::LoadLevel => self.load_level.render(renderer, context),
-            Mode::Quit => {}
-        };
-    }
-}
-
-enum RunState {
-    Run,
-    Quit,
 }
 
 fn refresh<'a>(
