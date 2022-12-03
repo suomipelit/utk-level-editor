@@ -1,8 +1,8 @@
 use std::cmp;
 
+use crate::graphics::Graphics;
 use crate::render::{Point, Renderer};
 use crate::types::Trigonometry;
-use crate::Graphics;
 
 pub const TITLE_POSITION: (u32, u32) = (20, 10);
 

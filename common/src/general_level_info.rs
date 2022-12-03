@@ -1,8 +1,9 @@
+use crate::context::Context;
 use crate::event::{Event, Keycode};
 use crate::render::Renderer;
 use crate::types::*;
-use crate::Context;
-use crate::{get_bottom_text_position, TextInput};
+use crate::util::get_bottom_text_position;
+use crate::TextInput;
 
 enum Value {
     Comment,

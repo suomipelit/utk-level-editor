@@ -1,10 +1,11 @@
+use crate::context::Context;
 use crate::event::{Event, Keycode};
 use crate::level::Level;
 use crate::level::ALL_CRATES;
 use crate::render::Renderer;
 use crate::types::*;
 use crate::util::{get_bottom_text_position, TITLE_POSITION};
-use crate::{Context, TextInput};
+use crate::TextInput;
 
 fn get_value(level: &Level, game_type: &GameType, index: usize) -> u32 {
     let crates = match game_type {

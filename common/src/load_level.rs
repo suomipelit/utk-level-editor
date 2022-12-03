@@ -1,9 +1,8 @@
+use crate::context::Context;
 use crate::event::{Event, Keycode};
-use crate::get_bottom_text_position;
 use crate::render::Renderer;
 use crate::types::*;
-use crate::util::TITLE_POSITION;
-use crate::Context;
+use crate::util::{get_bottom_text_position, TITLE_POSITION};
 
 pub trait LevelLister {
     fn refresh(&mut self);

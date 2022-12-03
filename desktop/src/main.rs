@@ -1,49 +1,28 @@
+mod render;
+
 use sdl2::image::InitFlag;
 use sdl2::keyboard::TextInputUtil;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
-
-use crate::context::Context;
-use crate::context::Textures;
-use crate::context_util::{get_textures, resize};
-use crate::editor::{EditorState, LevelWriter};
-use crate::event::{Event, Keycode, MouseButton, WindowEvent};
-use crate::fn2::FN2;
-use crate::font::Font;
-use crate::general_level_info::GeneralLevelInfoState;
-use crate::graphics::Graphics;
-use crate::help::HelpState;
-use crate::level::Level;
-use crate::load_level::{LevelLister, LoadLevelState};
-use crate::random_item_editor::RandomItemEditorState;
-use crate::render::{Renderer, SdlRenderer};
-use crate::tile_selector::TileSelectState;
-use crate::types::*;
-use crate::util::*;
 use std::time::Duration;
 
-mod context;
-mod context_util;
-mod editor;
-mod event;
-mod fn2;
-mod font;
-mod general_level_info;
-mod graphics;
-mod help;
-mod level;
-mod load_level;
-mod random_item_editor;
-mod render;
-mod tile_selector;
-mod types;
-mod util;
-
-pub trait TextInput {
-    fn start(&self);
-    fn stop(&self);
-}
+use crate::render::SdlRenderer;
+use common::context::{Context, Textures};
+use common::editor::{EditorState, LevelWriter};
+use common::event::{Event, Keycode, MouseButton, WindowEvent};
+use common::fn2::FN2;
+use common::font::Font;
+use common::general_level_info::GeneralLevelInfoState;
+use common::graphics::Graphics;
+use common::help::HelpState;
+use common::level::Level;
+use common::load_level::{LevelLister, LoadLevelState};
+use common::random_item_editor::RandomItemEditorState;
+use common::render::Renderer;
+use common::tile_selector::TileSelectState;
+use common::types::*;
+use common::TextInput;
 
 struct SdlTextInput(TextInputUtil);
 
@@ -191,6 +170,40 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
 enum RunState {
     Run,
     Quit,
+}
+
+fn refresh<'a>(
+    renderer: &'a SdlRenderer,
+    context: &mut Context<'a, SdlRenderer>,
+    window_size: (u32, u32),
+) {
+    context.graphics.resolution_x = window_size.0;
+    context.graphics.resolution_y = window_size.1;
+    context.font = Font::new(renderer, &context.fn2);
+    context.textures = get_textures(renderer);
+}
+
+pub fn resize<'a>(
+    renderer: &'a SdlRenderer,
+    context: &mut Context<'a, SdlRenderer>,
+    event: WindowEvent,
+) {
+    match event {
+        WindowEvent::Resized { width, height } => {
+            refresh(renderer, context, (width, height));
+        }
+        WindowEvent::Maximized => {
+            refresh(renderer, context, renderer.window_size());
+        }
+    }
+}
+
+pub fn get_textures(renderer: &SdlRenderer) -> Textures<<SdlRenderer as Renderer>::Texture> {
+    Textures {
+        floor: renderer.load_texture("assets/FLOOR1.PNG"),
+        walls: renderer.load_texture("assets/WALLS1.PNG"),
+        shadows: renderer.load_texture("assets/SHADOWS_ALPHA.PNG"),
+    }
 }
 
 fn convert_event(event: sdl2::event::Event) -> Option<Event> {

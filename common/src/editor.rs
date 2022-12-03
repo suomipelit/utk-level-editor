@@ -1,18 +1,17 @@
 use std::marker::PhantomData;
 
+use crate::context::Context;
 use crate::event::{Event, Keycode, MouseButton};
+use crate::graphics::Graphics;
+use crate::level::Level;
 use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
 use crate::level::{CrateClass, StaticCrate};
 use crate::render::{Point, Rect, Renderer, RendererColor};
 use crate::types::GameType;
+use crate::types::{Mode, TextureType};
 use crate::util::*;
-use crate::Context;
-use crate::Graphics;
-use crate::Level;
-use crate::Mode;
 use crate::TextInput;
-use crate::TextureType;
 
 #[derive(PartialEq)]
 enum NewLevelState {

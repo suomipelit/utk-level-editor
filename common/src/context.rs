@@ -1,10 +1,9 @@
 use crate::fn2::FN2;
 use crate::font::Font;
 use crate::graphics::Graphics;
+use crate::level::Level;
 use crate::render::Renderer;
-use crate::Level;
-use crate::TextureType;
-use crate::Trigonometry;
+use crate::types::{TextureType, Trigonometry};
 
 pub struct Textures<Texture> {
     pub floor: Texture,

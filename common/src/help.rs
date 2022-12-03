@@ -1,7 +1,7 @@
+use crate::context::Context;
 use crate::event::Event;
 use crate::render::Renderer;
-use crate::Context;
-use crate::Mode;
+use crate::types::Mode;
 
 const LINES: [&str; 19] = [
     "ESC - quit",

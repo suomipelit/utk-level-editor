@@ -1,8 +1,8 @@
+use crate::context::Context;
 use crate::event::{Event, Keycode, MouseButton};
 use crate::render::{get_texture_rect, get_texture_render_size, Renderer, RendererColor};
 use crate::types::*;
 use crate::util::*;
-use crate::Context;
 
 pub struct TileSelectState;
 
