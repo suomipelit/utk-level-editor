@@ -58,12 +58,7 @@ impl<L: LevelLister> LoadLevelState<L> {
                     if self.level_lister.len() > 0 {
                         let level_data = self.level_lister.load_level(self.selected);
                         context.level.deserialize(&level_data).unwrap();
-                        let level_name = self
-                            .level_lister
-                            .level_name(self.selected)
-                            .strip_prefix("./")
-                            .unwrap()
-                            .to_string();
+                        let level_name = self.level_lister.level_name(self.selected).to_string();
                         context.saved_level_name = Some(level_name.clone());
                         context.level_save_name =
                             level_name.strip_suffix(".LEV").unwrap().to_string();

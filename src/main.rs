@@ -304,9 +304,11 @@ impl LevelLister for DirectoryLevelLister {
     fn refresh(&mut self) {
         self.files = fs::read_dir("./")
             .unwrap()
-            .filter_map(|read_dir_result| {
-                let filename = read_dir_result.unwrap().path().display().to_string();
-                if filename.to_uppercase().ends_with(".LEV") {
+            .filter_map(|entry_result| {
+                let entry = entry_result.unwrap();
+                let is_file = entry.metadata().unwrap().is_file();
+                let filename = entry.file_name().into_string().unwrap();
+                if is_file && filename.to_uppercase().ends_with(".LEV") {
                     Some(filename)
                 } else {
                     None
