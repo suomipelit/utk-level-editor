@@ -1,6 +1,5 @@
-use byteorder::{LittleEndian, ReadBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::collections::HashMap;
-use std::io::Write;
 
 use crate::types::*;
 use crate::util::*;
@@ -437,88 +436,86 @@ impl Level {
 
     pub fn serialize(&self) -> Vec<u8> {
         let mut data = Vec::new();
-        data.write_all(&VERSION.to_le_bytes())
+        data.write_u32::<LittleEndian>(VERSION)
             .expect("Failed to write version");
-        data.write_all(&(self.tiles[0].len() as u32).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.tiles[0].len() as u32)
             .expect("Failed to write x size");
-        data.write_all(&(self.tiles.len() as u32).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.tiles.len() as u32)
             .expect("Failed to write y size");
-        for y in 0..(self.tiles.len()) {
+        for y in 0..self.tiles.len() {
             for x in 0..self.tiles[0].len() {
-                data.write_all(&(self.tiles[y][x].texture_type as u32).to_le_bytes())
+                data.write_u32::<LittleEndian>(self.tiles[y][x].texture_type as u32)
                     .expect("Failed to write block type");
-                data.write_all(&self.tiles[y][x].id.to_le_bytes())
+                data.write_u32::<LittleEndian>(self.tiles[y][x].id)
                     .expect("Failed to write block num");
-                data.write_all(&self.tiles[y][x].shadow.to_le_bytes())
+                data.write_u32::<LittleEndian>(self.tiles[y][x].shadow)
                     .expect("Failed to write block shadow");
             }
         }
 
-        data.write_all(&(self.p1_position.0).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.p1_position.0)
             .expect("Failed to write p1 start x");
-        data.write_all(&(self.p1_position.1).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.p1_position.1)
             .expect("Failed to write p1 start y");
-        data.write_all(&(self.p2_position.0).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.p2_position.0)
             .expect("Failed to write p2 start x");
-        data.write_all(&(self.p2_position.1).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.p2_position.1)
             .expect("Failed to write p2 start y");
 
-        data.write_all(&(self.spotlights.len() as u32).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.spotlights.len() as u32)
             .expect("Failed to write spot amount");
 
         for (coordinates, spotlight) in &self.spotlights {
-            data.write_all(&coordinates.0.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.0)
                 .expect("Failed to write spotlight x position");
-            data.write_all(&coordinates.1.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.1)
                 .expect("Failed to write spotlight y position");
-            data.write_all(&(*spotlight as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(*spotlight as u32)
                 .expect("Failed to write spotlight intensity");
         }
 
-        data.write_all(&(self.steams.len() as u32).to_le_bytes())
+        data.write_u32::<LittleEndian>(self.steams.len() as u32)
             .expect("Failed to write steam amount");
 
         for (coordinates, steam) in &self.steams {
-            data.write_all(&coordinates.0.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.0)
                 .expect("Failed to write steam x position");
-            data.write_all(&coordinates.1.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.1)
                 .expect("Failed to write steam y position");
-            data.write_all(&(steam.angle as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(steam.angle as u32)
                 .expect("Failed to write steam angle");
-            data.write_all(&(steam.range as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(steam.range as u32)
                 .expect("Failed to write steam range");
         }
-        data.write_all(self.general_info.comment.as_bytes())
-            .expect("Failed to write comment");
+        data.extend_from_slice(self.general_info.comment.as_bytes());
         for _ in 0..20 - self.general_info.comment.len() {
-            data.write_all(b"\0")
-                .expect("Failed to write comment padding");
+            data.write_u8(0).expect("Failed to write comment padding");
         }
-        data.write_all(&self.general_info.time_limit.to_le_bytes())
+        data.write_u32::<LittleEndian>(self.general_info.time_limit)
             .expect("Failed to write time limit");
         for enemy_amount in self.general_info.enemy_table {
-            data.write_all(&enemy_amount.to_le_bytes())
+            data.write_u32::<LittleEndian>(enemy_amount)
                 .expect("Failed to write normal game enemies");
         }
         for weapon_amount in self.crates.random.normal.weapons {
-            data.write_all(&weapon_amount.to_le_bytes())
+            data.write_u32::<LittleEndian>(weapon_amount)
                 .expect("Failed to write normal game weapons");
         }
         for bullet_amount in self.crates.random.normal.bullets {
-            data.write_all(&bullet_amount.to_le_bytes())
+            data.write_u32::<LittleEndian>(bullet_amount)
                 .expect("Failed to write normal game bullets");
         }
-        data.write_all(&self.crates.random.normal.energy.to_le_bytes())
+        data.write_u32::<LittleEndian>(self.crates.random.normal.energy)
             .expect("Failed to write normal game energy crates");
         for weapon_amount in self.crates.random.deathmatch.weapons {
-            data.write_all(&weapon_amount.to_le_bytes())
+            data.write_u32::<LittleEndian>(weapon_amount)
                 .expect("Failed to write deathmatch game weapons");
         }
         for bullet_amount in self.crates.random.deathmatch.bullets {
-            data.write_all(&bullet_amount.to_le_bytes())
+            data.write_u32::<LittleEndian>(bullet_amount)
                 .expect("Failed to write deathmatch game bullets");
         }
-        data.write_all(&self.crates.random.deathmatch.energy.to_le_bytes())
+        data.write_u32::<LittleEndian>(self.crates.random.deathmatch.energy)
             .expect("Failed to write deathmatch game energy crates");
 
         let normal_static_crates: HashMap<Position, StaticCrateType> = self
@@ -528,16 +525,16 @@ impl Level {
             .into_iter()
             .filter(|(_coordinates, crate_item)| crate_item.crate_variant == StaticCrate::Normal)
             .collect();
-        data.write_all(&(normal_static_crates.len() as u32).to_le_bytes())
+        data.write_u32::<LittleEndian>(normal_static_crates.len() as u32)
             .expect("Failed to write normal game crate amount");
         for (coordinates, crate_item) in &normal_static_crates {
-            data.write_all(&(crate_item.crate_class as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(crate_item.crate_class as u32)
                 .expect("Failed to write normal game static crate class");
-            data.write_all(&(crate_item.crate_type as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(crate_item.crate_type as u32)
                 .expect("Failed to write normal game static crate type");
-            data.write_all(&coordinates.0.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.0)
                 .expect("Failed to write normal game static crate x position");
-            data.write_all(&coordinates.1.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.1)
                 .expect("Failed to write normal game static crate y position");
         }
 
@@ -550,16 +547,16 @@ impl Level {
                 crate_item.crate_variant == StaticCrate::Deathmatch
             })
             .collect();
-        data.write_all(&(deathmatch_static_crates.len() as u32).to_le_bytes())
+        data.write_u32::<LittleEndian>(deathmatch_static_crates.len() as u32)
             .expect("Failed to write deathmatch game crate amount");
         for (coordinates, crate_item) in &deathmatch_static_crates {
-            data.write_all(&(crate_item.crate_class as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(crate_item.crate_class as u32)
                 .expect("Failed to write deathmatch game static crate class");
-            data.write_all(&(crate_item.crate_type as u32).to_le_bytes())
+            data.write_u32::<LittleEndian>(crate_item.crate_type as u32)
                 .expect("Failed to write deathmatch game static crate type");
-            data.write_all(&coordinates.0.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.0)
                 .expect("Failed to write deathmatch game static crate x position");
-            data.write_all(&coordinates.1.to_le_bytes())
+            data.write_u32::<LittleEndian>(coordinates.1)
                 .expect("Failed to write deathmatch game static crate y position");
         }
         data
@@ -701,12 +698,8 @@ impl Level {
         self.crates.random.deathmatch.energy = data.read_u32::<LittleEndian>()?;
 
         if version >= 5 {
-            Level::deserialize_crates(&mut data, &mut self.crates.staticc, StaticCrate::Normal)?;
-            Level::deserialize_crates(
-                &mut data,
-                &mut self.crates.staticc,
-                StaticCrate::Deathmatch,
-            )?;
+            Level::deserialize_crates(data, &mut self.crates.staticc, StaticCrate::Normal)?;
+            Level::deserialize_crates(data, &mut self.crates.staticc, StaticCrate::Deathmatch)?;
         }
 
         Ok(())
