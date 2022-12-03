@@ -574,7 +574,7 @@ impl Level {
         )
     }
 
-    pub fn deserialize(&mut self, filename: &str) -> Result<(), DeserializationError> {
+    pub fn deserialize(&mut self, mut data: &[u8]) -> Result<(), DeserializationError> {
         self.scroll = (0, 0);
         self.spotlights.clear();
         self.steams.clear();
@@ -586,8 +586,7 @@ impl Level {
         self.crates.random.deathmatch.weapons.fill(0);
         self.crates.random.deathmatch.bullets.fill(0);
 
-        let mut file = File::open(filename)?;
-        let version: u32 = file.read_u32::<LittleEndian>()?;
+        let version: u32 = data.read_u32::<LittleEndian>()?;
 
         if version > VERSION {
             return Err(DeserializationError::ContentError(
@@ -595,14 +594,14 @@ impl Level {
             ));
         }
 
-        let x_size: u32 = file.read_u32::<LittleEndian>()?;
+        let x_size: u32 = data.read_u32::<LittleEndian>()?;
         if x_size < 1 {
             return Err(DeserializationError::ContentError(
                 FileTypeError::InvalidLevelSize,
             ));
         }
 
-        let y_size: u32 = file.read_u32::<LittleEndian>()?;
+        let y_size: u32 = data.read_u32::<LittleEndian>()?;
         if y_size < 1 {
             return Err(DeserializationError::ContentError(
                 FileTypeError::InvalidLevelSize,
@@ -614,53 +613,53 @@ impl Level {
             let mut row = Vec::new();
             for _ in 0..x_size {
                 row.push(Tile {
-                    texture_type: TextureType::from_u32(file.read_u32::<LittleEndian>()?),
-                    id: file.read_u32::<LittleEndian>()?,
-                    shadow: file.read_u32::<LittleEndian>()?,
+                    texture_type: TextureType::from_u32(data.read_u32::<LittleEndian>()?),
+                    id: data.read_u32::<LittleEndian>()?,
+                    shadow: data.read_u32::<LittleEndian>()?,
                 });
             }
             tiles.push(row);
         }
         self.tiles = tiles;
 
-        self.p1_position.0 = file.read_u32::<LittleEndian>()?;
-        self.p1_position.1 = file.read_u32::<LittleEndian>()?;
-        self.p2_position.0 = file.read_u32::<LittleEndian>()?;
-        self.p2_position.1 = file.read_u32::<LittleEndian>()?;
+        self.p1_position.0 = data.read_u32::<LittleEndian>()?;
+        self.p1_position.1 = data.read_u32::<LittleEndian>()?;
+        self.p2_position.0 = data.read_u32::<LittleEndian>()?;
+        self.p2_position.1 = data.read_u32::<LittleEndian>()?;
 
-        let spotlight_amount = file.read_u32::<LittleEndian>()?;
+        let spotlight_amount = data.read_u32::<LittleEndian>()?;
 
         for _ in 0..spotlight_amount {
-            let spotlight_x = file.read_u32::<LittleEndian>()?;
-            let spotlight_y = file.read_u32::<LittleEndian>()?;
+            let spotlight_x = data.read_u32::<LittleEndian>()?;
+            let spotlight_y = data.read_u32::<LittleEndian>()?;
             self.spotlights.insert(
                 (spotlight_x, spotlight_y),
-                file.read_u32::<LittleEndian>()? as u8,
+                data.read_u32::<LittleEndian>()? as u8,
             );
         }
 
-        let steam_amount = file.read_u32::<LittleEndian>()?;
+        let steam_amount = data.read_u32::<LittleEndian>()?;
 
         for _ in 0..steam_amount {
-            let steam_x = file.read_u32::<LittleEndian>()?;
-            let steam_y = file.read_u32::<LittleEndian>()?;
+            let steam_x = data.read_u32::<LittleEndian>()?;
+            let steam_y = data.read_u32::<LittleEndian>()?;
             self.steams.insert(
                 (steam_x, steam_y),
                 Steam {
-                    angle: file.read_u32::<LittleEndian>()? as u16,
-                    range: file.read_u32::<LittleEndian>()? as u8,
+                    angle: data.read_u32::<LittleEndian>()? as u16,
+                    range: data.read_u32::<LittleEndian>()? as u8,
                 },
             );
         }
 
         for _ in 0..20 {
-            let c = file.read_u8()? as char;
+            let c = data.read_u8()? as char;
             if c != '\0' {
                 self.general_info.comment.push(c);
             }
         }
 
-        self.general_info.time_limit = file.read_u32::<LittleEndian>()?;
+        self.general_info.time_limit = data.read_u32::<LittleEndian>()?;
 
         let number_of_enemy_types = if version >= 4 {
             DIFF_ENEMIES
@@ -668,7 +667,7 @@ impl Level {
             DIFF_ENEMIES - 1
         } as usize;
         for enemy_number in 0..number_of_enemy_types {
-            self.general_info.enemy_table[enemy_number] = file.read_u32::<LittleEndian>()?;
+            self.general_info.enemy_table[enemy_number] = data.read_u32::<LittleEndian>()?;
         }
 
         let number_of_weapons = if version == 1 {
@@ -679,7 +678,7 @@ impl Level {
             DIFF_WEAPONS
         } as usize;
         for weapon_number in 0..number_of_weapons {
-            self.crates.random.normal.weapons[weapon_number] = file.read_u32::<LittleEndian>()?;
+            self.crates.random.normal.weapons[weapon_number] = data.read_u32::<LittleEndian>()?;
         }
         let number_of_bullets = if version == 1 {
             DIFF_BULLETS - 2
@@ -689,24 +688,24 @@ impl Level {
             DIFF_BULLETS
         } as usize;
         for bullet_number in 0..number_of_bullets {
-            self.crates.random.normal.bullets[bullet_number] = file.read_u32::<LittleEndian>()?;
+            self.crates.random.normal.bullets[bullet_number] = data.read_u32::<LittleEndian>()?;
         }
-        self.crates.random.normal.energy = file.read_u32::<LittleEndian>()?;
+        self.crates.random.normal.energy = data.read_u32::<LittleEndian>()?;
 
         for weapon_number in 0..number_of_weapons {
             self.crates.random.deathmatch.weapons[weapon_number] =
-                file.read_u32::<LittleEndian>()?;
+                data.read_u32::<LittleEndian>()?;
         }
         for bullet_number in 0..number_of_bullets {
             self.crates.random.deathmatch.bullets[bullet_number] =
-                file.read_u32::<LittleEndian>()?;
+                data.read_u32::<LittleEndian>()?;
         }
-        self.crates.random.deathmatch.energy = file.read_u32::<LittleEndian>()?;
+        self.crates.random.deathmatch.energy = data.read_u32::<LittleEndian>()?;
 
         if version >= 5 {
-            Level::deserialize_crates(&mut file, &mut self.crates.staticc, StaticCrate::Normal)?;
+            Level::deserialize_crates(&mut data, &mut self.crates.staticc, StaticCrate::Normal)?;
             Level::deserialize_crates(
-                &mut file,
+                &mut data,
                 &mut self.crates.staticc,
                 StaticCrate::Deathmatch,
             )?;
@@ -716,21 +715,21 @@ impl Level {
     }
 
     fn deserialize_crates(
-        file: &mut File,
+        mut data: &[u8],
         crates: &mut HashMap<Position, StaticCrateType>,
         crate_variant: StaticCrate,
     ) -> Result<(), DeserializationError> {
-        let number_of_crates = file.read_u32::<LittleEndian>()?;
+        let number_of_crates = data.read_u32::<LittleEndian>()?;
         for _crate_index in 0..number_of_crates {
             let crate_item = StaticCrateType {
                 crate_variant,
-                crate_class: CrateClass::from_u32(file.read_u32::<LittleEndian>()?),
-                crate_type: file.read_u32::<LittleEndian>()? as u8,
+                crate_class: CrateClass::from_u32(data.read_u32::<LittleEndian>()?),
+                crate_type: data.read_u32::<LittleEndian>()? as u8,
             };
             crates.insert(
                 (
-                    file.read_u32::<LittleEndian>()?,
-                    file.read_u32::<LittleEndian>()?,
+                    data.read_u32::<LittleEndian>()?,
+                    data.read_u32::<LittleEndian>()?,
                 ),
                 crate_item,
             );

@@ -1,5 +1,6 @@
 use sdl2::image::InitFlag;
 use sdl2::keyboard::TextInputUtil;
+use std::fs;
 use std::fs::File;
 use std::io::Read;
 
@@ -14,7 +15,7 @@ use crate::general_level_info::GeneralLevelInfoState;
 use crate::graphics::Graphics;
 use crate::help::HelpState;
 use crate::level::Level;
-use crate::load_level::LoadLevelState;
+use crate::load_level::{LevelLister, LoadLevelState};
 use crate::random_item_editor::RandomItemEditorState;
 use crate::render::{Renderer, SdlRenderer};
 use crate::tile_selector::TileSelectState;
@@ -100,7 +101,8 @@ pub fn main() {
     };
     let text_input = SdlTextInput(video_subsystem.text_input());
 
-    let mut state = State::new();
+    let level_lister = DirectoryLevelLister::new();
+    let mut state = State::new(level_lister);
     loop {
         for sdl_event in event_pump.poll_iter() {
             if let Some(event) = convert_event(sdl_event) {
@@ -119,18 +121,18 @@ pub fn main() {
     }
 }
 
-struct State {
+struct State<L: LevelLister> {
     mode: Mode,
     editor: EditorState,
     tile_select: TileSelectState,
     help: HelpState,
     general_level_info: GeneralLevelInfoState,
     random_item_editor: RandomItemEditorState,
-    load_level: LoadLevelState,
+    load_level: LoadLevelState<L>,
 }
 
-impl State {
-    pub fn new() -> Self {
+impl<L: LevelLister> State<L> {
+    pub fn new(level_lister: L) -> Self {
         Self {
             mode: Mode::Editor,
             editor: EditorState::new(),
@@ -138,7 +140,7 @@ impl State {
             help: HelpState::new(),
             general_level_info: GeneralLevelInfoState::new(),
             random_item_editor: RandomItemEditorState::new(),
-            load_level: LoadLevelState::new(),
+            load_level: LoadLevelState::new(level_lister),
         }
     }
 
@@ -148,6 +150,7 @@ impl State {
         text_input: &T,
         event: Event,
     ) -> RunState {
+        let prev_mode = self.mode;
         self.mode = match self.mode {
             Mode::Editor => self.editor.handle_event(context, text_input, event),
             Mode::TileSelect => self.tile_select.handle_event(context, event),
@@ -161,6 +164,9 @@ impl State {
             Mode::LoadLevel => self.load_level.handle_event(context, event),
             Mode::Quit => Mode::Quit,
         };
+        if self.mode != prev_mode && self.mode == Mode::LoadLevel {
+            self.load_level.enter()
+        }
         match self.mode {
             Mode::Quit => RunState::Quit,
             _ => RunState::Run,
@@ -281,5 +287,46 @@ fn convert_mouse_button(button: sdl2::mouse::MouseButton) -> Option<MouseButton>
         sdl2::mouse::MouseButton::Left => Some(MouseButton::Left),
         sdl2::mouse::MouseButton::Right => Some(MouseButton::Right),
         _ => None,
+    }
+}
+
+struct DirectoryLevelLister {
+    files: Vec<String>,
+}
+
+impl DirectoryLevelLister {
+    pub fn new() -> Self {
+        Self { files: vec![] }
+    }
+}
+
+impl LevelLister for DirectoryLevelLister {
+    fn refresh(&mut self) {
+        self.files = fs::read_dir("./")
+            .unwrap()
+            .filter_map(|read_dir_result| {
+                let filename = read_dir_result.unwrap().path().display().to_string();
+                if filename.to_uppercase().ends_with(".LEV") {
+                    Some(filename)
+                } else {
+                    None
+                }
+            })
+            .collect();
+    }
+
+    fn len(&self) -> usize {
+        self.files.len()
+    }
+
+    fn level_name(&self, index: usize) -> &str {
+        &self.files[index]
+    }
+
+    fn load_level(&self, index: usize) -> Vec<u8> {
+        let mut file = File::open(&self.files[index]).unwrap();
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer).unwrap();
+        buffer
     }
 }
