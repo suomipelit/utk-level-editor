@@ -25,6 +25,10 @@ impl SdlRenderer {
         }
     }
 
+    pub fn load_texture(&self, path: &str) -> SdlTexture {
+        self.texture_creator.load_texture(path).unwrap()
+    }
+
     pub fn present(&self) {
         self.canvas.borrow_mut().present();
     }
@@ -32,10 +36,6 @@ impl SdlRenderer {
 
 impl<'a> Renderer<'a> for SdlRenderer {
     type Texture = SdlTexture<'a>;
-
-    fn load_texture(&'a self, path: &str) -> Self::Texture {
-        self.texture_creator.load_texture(path).unwrap()
-    }
 
     fn create_texture(&'a self, width: u32, height: u32, pixels: &[Color]) -> Self::Texture {
         let mut data = Vec::with_capacity(pixels.len() * 4);

@@ -94,7 +94,6 @@ impl Rect {
 pub trait Renderer<'a> {
     type Texture;
 
-    fn load_texture(&'a self, path: &str) -> Self::Texture;
     fn create_texture(&'a self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
     fn clear_screen(&self);
     fn highlight_selected_tile(&self, graphics: &Graphics, id: u32, color: &RendererColor);
