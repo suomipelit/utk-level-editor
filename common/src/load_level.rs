@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crate::event::{Event, Keycode};
-use crate::render::Renderer;
+use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::{get_bottom_text_position, TITLE_POSITION};
 
@@ -29,11 +29,7 @@ impl<L: LevelLister> LoadLevelState<L> {
         self.selected = 0;
     }
 
-    pub fn handle_event<'a, R: Renderer<'a>>(
-        &mut self,
-        context: &mut Context<'a, R>,
-        event: Event,
-    ) -> Mode {
+    pub fn handle_event<T: Texture>(&mut self, context: &mut Context<T>, event: Event) -> Mode {
         match event {
             Event::Quit { .. }
             | Event::KeyDown {
@@ -71,7 +67,7 @@ impl<L: LevelLister> LoadLevelState<L> {
         Mode::LoadLevel
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<'a, R>) {
+    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let text_position = (40, 60);
         context

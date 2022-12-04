@@ -46,7 +46,7 @@ impl HelpState {
         Mode::Help
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<'a, R>) {
+    pub fn render<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let mut position = 6;
         for line_text in &LINES {

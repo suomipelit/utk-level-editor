@@ -7,7 +7,7 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::time::Duration;
 
-use crate::render::SdlRenderer;
+use crate::render::{SdlRenderer, SdlTexture};
 use common::context::{Context, Textures};
 use common::editor::LevelWriter;
 use common::event::{Event, Keycode, MouseButton, WindowEvent};
@@ -98,7 +98,7 @@ pub fn main() {
 
 fn refresh<'a>(
     renderer: &'a SdlRenderer,
-    context: &mut Context<'a, SdlRenderer>,
+    context: &mut Context<SdlTexture<'a>>,
     window_size: (u32, u32),
 ) {
     context.graphics.resolution_x = window_size.0;
@@ -109,7 +109,7 @@ fn refresh<'a>(
 
 pub fn resize<'a>(
     renderer: &'a SdlRenderer,
-    context: &mut Context<'a, SdlRenderer>,
+    context: &mut Context<SdlTexture<'a>>,
     event: WindowEvent,
 ) {
     match event {
@@ -122,7 +122,7 @@ pub fn resize<'a>(
     }
 }
 
-pub fn get_textures(renderer: &SdlRenderer) -> Textures<<SdlRenderer as Renderer>::Texture> {
+pub fn get_textures<'a>(renderer: &'a SdlRenderer) -> Textures<SdlTexture<'a>> {
     Textures {
         floor: renderer.load_texture("assets/FLOOR1.PNG"),
         walls: renderer.load_texture("assets/WALLS1.PNG"),

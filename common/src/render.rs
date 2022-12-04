@@ -91,8 +91,12 @@ impl Rect {
     }
 }
 
+pub trait Texture {
+    fn size(&self) -> (u32, u32);
+}
+
 pub trait Renderer<'a> {
-    type Texture;
+    type Texture: Texture;
 
     fn create_texture(&'a self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
     fn clear_screen(&self);
@@ -101,19 +105,15 @@ pub trait Renderer<'a> {
     fn draw_circle(&self, center: Point, radius: u32, color: &RendererColor);
     fn render_texture(&self, texture: &Self::Texture, src: Option<Rect>, dst: Rect);
     fn fill_and_render_texture(&self, color: RendererColor, texture: &Self::Texture, dst: Rect);
-    fn get_texture_size(texture: &Self::Texture) -> (u32, u32);
     fn window_size(&self) -> (u32, u32);
 }
 
-pub fn get_texture_rect<'a, R: Renderer<'a>>(texture: &R::Texture, render_multiplier: u32) -> Rect {
-    let (width, height) = get_texture_render_size::<R>(texture, render_multiplier);
+pub fn get_texture_rect<T: Texture>(texture: &T, render_multiplier: u32) -> Rect {
+    let (width, height) = get_texture_render_size(texture, render_multiplier);
     Rect::new(0, 0, width, height)
 }
 
-pub fn get_texture_render_size<'a, R: Renderer<'a>>(
-    texture: &R::Texture,
-    render_multiplier: u32,
-) -> (u32, u32) {
-    let (width, height) = R::get_texture_size(texture);
+pub fn get_texture_render_size<T: Texture>(texture: &T, render_multiplier: u32) -> (u32, u32) {
+    let (width, height) = texture.size();
     (width * render_multiplier, height * render_multiplier)
 }

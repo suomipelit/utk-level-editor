@@ -7,7 +7,7 @@ use crate::level::Level;
 use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
 use crate::level::{CrateClass, StaticCrate};
-use crate::render::{Point, Rect, Renderer, RendererColor};
+use crate::render::{Point, Rect, Renderer, RendererColor, Texture};
 use crate::types::GameType;
 use crate::types::{Mode, TextureType};
 use crate::util::*;
@@ -90,10 +90,10 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    pub fn handle_event<'a, R: Renderer<'a>, T: TextInput>(
+    pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
-        context: &mut Context<'a, R>,
-        text_input: &T,
+        context: &mut Context<T>,
+        text_input: &I,
         event: Event,
     ) -> Mode {
         match event {
@@ -533,7 +533,7 @@ impl<W: LevelWriter> EditorState<W> {
         Mode::Editor
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<'a, R>) {
+    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
         self.render_level(renderer, context);
 
         let highlighted_id = get_tile_id_from_coordinates(
@@ -630,7 +630,7 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_level<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<'a, R>) {
+    fn render_level<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let level = &context.level;
         let graphics = &context.graphics;
@@ -652,7 +652,7 @@ impl<W: LevelWriter> EditorState<W> {
                     TextureType::Walls => &textures.walls,
                     TextureType::Shadow => unreachable!(),
                 };
-                let (texture_width, _) = R::get_texture_size(texture);
+                let (texture_width, _) = texture.size();
                 let src = get_block(
                     level.tiles[y_index][x_index].id,
                     texture_width,
@@ -662,7 +662,7 @@ impl<W: LevelWriter> EditorState<W> {
                     get_absolute_coordinates_from_logical(x, y, graphics.get_render_size());
                 let dst = Rect::new(x_absolute, y_absolute, render_size, render_size);
                 renderer.render_texture(texture, Some(src), dst);
-                let (shadow_texture_width, _) = R::get_texture_size(&textures.shadows);
+                let (shadow_texture_width, _) = textures.shadows.size();
                 if level.tiles[y_index][x_index].shadow > 0 {
                     let src = get_block(
                         level.tiles[y_index][x_index].shadow - 1,
@@ -729,7 +729,7 @@ impl<W: LevelWriter> EditorState<W> {
     fn render_input_prompt<'a, R: Renderer<'a>>(
         &self,
         renderer: &'a R,
-        context: &Context<'a, R>,
+        context: &Context<R::Texture>,
         prompt_position: (u32, u32),
         prompt_line_spacing: u32,
         instruction_text: &str,
@@ -760,7 +760,7 @@ impl<W: LevelWriter> EditorState<W> {
     fn render_prompt_if_needed<'a, R: Renderer<'a>>(
         &self,
         renderer: &'a R,
-        context: &Context<'a, R>,
+        context: &Context<R::Texture>,
     ) {
         if self.prompt != PromptType::None {
             let prompt_position = (context.graphics.resolution_x / 2 - 100, 200);
@@ -831,7 +831,7 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn handle_mouse_left_down<'a, R: Renderer<'a>>(&mut self, context: &mut Context<'a, R>) {
+    fn handle_mouse_left_down<T: Texture>(&mut self, context: &mut Context<T>) {
         if self.drag_tiles {
             return;
         }
@@ -918,7 +918,7 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn handle_mouse_right_down<'a, R: Renderer<'a>>(&self, context: &mut Context<'a, R>) {
+    fn handle_mouse_right_down<T: Texture>(&self, context: &mut Context<T>) {
         let pointed_tile = get_tile_id_from_coordinates(
             &context.graphics,
             &get_limited_screen_level_size(

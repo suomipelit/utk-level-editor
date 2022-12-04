@@ -7,18 +7,18 @@ const INDEX_OFFSET: usize = 33;
 const SPACE_WIDTH: u32 = 5;
 const TEXT_SHADOW_PIXELS: u32 = 1;
 
-struct Glyph<'a, R: Renderer<'a> + ?Sized> {
+struct Glyph<T> {
     width: u32,
     height: u32,
-    texture: R::Texture,
+    texture: T,
 }
 
-pub struct Font<'a, R: Renderer<'a> + ?Sized> {
-    glyphs: Vec<Glyph<'a, R>>,
+pub struct Font<T> {
+    glyphs: Vec<Glyph<T>>,
 }
 
-impl<'a, R: Renderer<'a>> Font<'a, R> {
-    pub fn new(renderer: &'a R, fn2: &FN2) -> Self {
+impl<T> Font<T> {
+    pub fn new<'a, R: Renderer<'a, Texture = T>>(renderer: &'a R, fn2: &FN2) -> Self {
         let glyphs = fn2
             .characters
             .iter()
@@ -31,7 +31,10 @@ impl<'a, R: Renderer<'a>> Font<'a, R> {
         Self { glyphs }
     }
 
-    fn create_glyph_texture(renderer: &'a R, character: &Character) -> R::Texture {
+    fn create_glyph_texture<'a, R: Renderer<'a, Texture = T>>(
+        renderer: &'a R,
+        character: &Character,
+    ) -> T {
         let char_width = character.width;
         let char_height = character.height;
         let glyph_width = char_width + TEXT_SHADOW_PIXELS;
@@ -71,7 +74,7 @@ impl<'a, R: Renderer<'a>> Font<'a, R> {
         renderer.create_texture(glyph_width, glyph_height, &pixels)
     }
 
-    pub fn render_text_relative(
+    pub fn render_text_relative<'a, R: Renderer<'a, Texture = T>>(
         &self,
         renderer: &R,
         text: &str,
@@ -101,7 +104,12 @@ impl<'a, R: Renderer<'a>> Font<'a, R> {
         }
     }
 
-    pub fn render_text(&self, renderer: &R, text: &str, pos: (u32, u32)) {
+    pub fn render_text<'a, R: Renderer<'a, Texture = T>>(
+        &self,
+        renderer: &'a R,
+        text: &str,
+        pos: (u32, u32),
+    ) {
         self.render_text_relative(renderer, text, (0, 0), pos);
     }
 

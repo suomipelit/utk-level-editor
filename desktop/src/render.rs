@@ -1,14 +1,22 @@
 use common::graphics::Graphics;
-use common::render::{Color, Point, Rect, Renderer, RendererColor};
+use common::render::{Color, Point, Rect, Renderer, RendererColor, Texture};
 use common::util::get_tile_coordinates;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
-use sdl2::render::Texture as SdlTexture;
 use sdl2::render::TextureQuery;
 use sdl2::render::{Canvas, TextureCreator};
 use sdl2::surface::Surface;
 use sdl2::video::{Window, WindowContext};
 use std::cell::RefCell;
+
+pub struct SdlTexture<'a>(sdl2::render::Texture<'a>);
+
+impl Texture for SdlTexture<'_> {
+    fn size(&self) -> (u32, u32) {
+        let TextureQuery { width, height, .. } = self.0.query();
+        (width, height)
+    }
+}
 
 pub struct SdlRenderer {
     canvas: RefCell<Canvas<Window>>,
@@ -26,7 +34,7 @@ impl SdlRenderer {
     }
 
     pub fn load_texture(&self, path: &str) -> SdlTexture {
-        self.texture_creator.load_texture(path).unwrap()
+        SdlTexture(self.texture_creator.load_texture(path).unwrap())
     }
 
     pub fn present(&self) {
@@ -52,7 +60,7 @@ impl<'a> Renderer<'a> for SdlRenderer {
             width * 4,
             PixelFormatEnum::ABGR8888,
         );
-        return surface.unwrap().as_texture(&self.texture_creator).unwrap();
+        return SdlTexture(surface.unwrap().as_texture(&self.texture_creator).unwrap());
     }
 
     fn clear_screen(&self) {
@@ -151,7 +159,7 @@ impl<'a> Renderer<'a> for SdlRenderer {
     fn render_texture(&self, texture: &Self::Texture, src: Option<Rect>, dst: Rect) {
         self.canvas
             .borrow_mut()
-            .copy(texture, src.map(to_sdl_rect), Some(to_sdl_rect(dst)))
+            .copy(&texture.0, src.map(to_sdl_rect), Some(to_sdl_rect(dst)))
             .unwrap();
     }
 
@@ -159,12 +167,9 @@ impl<'a> Renderer<'a> for SdlRenderer {
         let mut canvas = self.canvas.borrow_mut();
         canvas.set_draw_color(to_sdl_color(&color));
         canvas.fill_rect(Some(to_sdl_rect(dst))).unwrap();
-        canvas.copy(texture, None, Some(to_sdl_rect(dst))).unwrap();
-    }
-
-    fn get_texture_size(texture: &Self::Texture) -> (u32, u32) {
-        let TextureQuery { width, height, .. } = texture.query();
-        (width, height)
+        canvas
+            .copy(&texture.0, None, Some(to_sdl_rect(dst)))
+            .unwrap();
     }
 
     fn window_size(&self) -> (u32, u32) {

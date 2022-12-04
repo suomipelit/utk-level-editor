@@ -5,7 +5,7 @@ use crate::general_level_info::GeneralLevelInfoState;
 use crate::help::HelpState;
 use crate::load_level::{LevelLister, LoadLevelState};
 use crate::random_item_editor::RandomItemEditorState;
-use crate::render::Renderer;
+use crate::render::{Renderer, Texture};
 use crate::tile_selector::TileSelectState;
 use crate::types::Mode;
 
@@ -58,10 +58,10 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
         }
     }
 
-    pub fn handle_event<'a, R: Renderer<'a>, T: TextInput>(
+    pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
-        context: &mut Context<'a, R>,
-        text_input: &T,
+        context: &mut Context<T>,
+        text_input: &I,
         event: Event,
     ) -> RunState {
         let prev_mode = self.mode;
@@ -87,7 +87,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
         }
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<'a, R>) {
+    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
         match self.mode {
             Mode::Editor => self.editor.render(renderer, context),
             Mode::TileSelect => self.tile_select.render(renderer, context),

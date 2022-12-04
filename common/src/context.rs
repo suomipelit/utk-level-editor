@@ -2,20 +2,20 @@ use crate::fn2::FN2;
 use crate::font::Font;
 use crate::graphics::Graphics;
 use crate::level::Level;
-use crate::render::Renderer;
+use crate::render::Texture;
 use crate::types::{TextureType, Trigonometry};
 
-pub struct Textures<Texture> {
-    pub floor: Texture,
-    pub walls: Texture,
-    pub shadows: Texture,
+pub struct Textures<T: Texture> {
+    pub floor: T,
+    pub walls: T,
+    pub shadows: T,
 }
 
-pub struct Context<'a, R: Renderer<'a>> {
+pub struct Context<T: Texture> {
     pub graphics: Graphics,
     pub fn2: FN2,
-    pub font: Font<'a, R>,
-    pub textures: Textures<R::Texture>,
+    pub font: Font<T>,
+    pub textures: Textures<T>,
     pub level: Level,
     pub selected_tile_id: u32,
     pub texture_type_selected: TextureType,

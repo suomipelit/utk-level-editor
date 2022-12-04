@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crate::event::{Event, Keycode};
-use crate::render::Renderer;
+use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::get_bottom_text_position;
 use crate::TextInput;
@@ -16,7 +16,7 @@ struct ConfigOption {
     value: Value,
 }
 
-fn load_value_text<'a, R: Renderer<'a>>(context: &Context<'a, R>, value: &Value) -> Option<String> {
+fn load_value_text<T: Texture>(context: &Context<T>, value: &Value) -> Option<String> {
     let string = match value {
         Value::Number(number) => context.level.general_info.enemy_table[*number].to_string(),
         Value::TimeLimit => format!("{} seconds", context.level.general_info.time_limit),
@@ -92,10 +92,10 @@ impl GeneralLevelInfoState {
         }
     }
 
-    pub fn handle_event<'a, R: Renderer<'a>, T: TextInput>(
+    pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
-        context: &mut Context<'a, R>,
-        text_input: &T,
+        context: &mut Context<T>,
+        text_input: &I,
         event: Event,
     ) -> Mode {
         match event {
@@ -159,7 +159,7 @@ impl GeneralLevelInfoState {
         Mode::GeneralLevelInfo
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<'a, R>) {
+    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let mut option_position = (40, 20);
         let mut value_position = (300, option_position.1);

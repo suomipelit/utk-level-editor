@@ -1,7 +1,7 @@
 use std::cmp;
 
 use crate::graphics::Graphics;
-use crate::render::{Point, Renderer};
+use crate::render::{Point, Texture};
 use crate::types::Trigonometry;
 
 pub const TITLE_POSITION: (u32, u32) = (20, 10);
@@ -153,11 +153,8 @@ pub fn limit_coordinates(coordinates: &(u32, u32), limit: &(u32, u32)) -> (u32, 
     )
 }
 
-pub fn get_number_of_tiles_in_texture<'a, R: Renderer<'a>>(
-    texture: &R::Texture,
-    tile_size: u32,
-) -> u32 {
-    let (width, height) = R::get_texture_size(texture);
+pub fn get_number_of_tiles_in_texture<T: Texture>(texture: &T, tile_size: u32) -> u32 {
+    let (width, height) = texture.size();
     width / tile_size * height / tile_size
 }
 
