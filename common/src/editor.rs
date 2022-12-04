@@ -7,7 +7,7 @@ use crate::level::Level;
 use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
 use crate::level::{CrateClass, StaticCrate};
-use crate::render::{Point, Rect, Renderer, RendererColor, Texture};
+use crate::render::{highlight_selected_tile, Point, Rect, Renderer, RendererColor, Texture};
 use crate::types::GameType;
 use crate::types::{Mode, TextureType};
 use crate::util::*;
@@ -547,7 +547,12 @@ impl<W: LevelWriter> EditorState<W> {
             context.graphics.get_x_tiles_per_screen(),
             None,
         );
-        renderer.highlight_selected_tile(&context.graphics, highlighted_id, &RendererColor::White);
+        highlight_selected_tile(
+            renderer,
+            &context.graphics,
+            highlighted_id,
+            &RendererColor::White,
+        );
         let render_size = context.graphics.get_render_size();
         context.font.render_text_relative(
             renderer,
@@ -616,7 +621,8 @@ impl<W: LevelWriter> EditorState<W> {
                     None,
                 );
                 for screen_tile_id in selected_screen_tiles {
-                    renderer.highlight_selected_tile(
+                    highlight_selected_tile(
+                        renderer,
                         &context.graphics,
                         screen_tile_id,
                         &RendererColor::White,

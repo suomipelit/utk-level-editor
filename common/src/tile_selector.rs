@@ -1,6 +1,9 @@
 use crate::context::Context;
 use crate::event::{Event, Keycode, MouseButton};
-use crate::render::{get_texture_rect, get_texture_render_size, Renderer, RendererColor, Texture};
+use crate::render::{
+    get_texture_rect, get_texture_render_size, highlight_selected_tile, Renderer, RendererColor,
+    Texture,
+};
 use crate::types::*;
 use crate::util::*;
 
@@ -98,7 +101,12 @@ impl TileSelectState {
             context.graphics.get_x_tiles_per_screen(),
             None,
         );
-        renderer.highlight_selected_tile(&context.graphics, highlighted_id, &RendererColor::White);
+        highlight_selected_tile(
+            renderer,
+            &context.graphics,
+            highlighted_id,
+            &RendererColor::White,
+        );
         if context.texture_type_selected == context.texture_type_scrolled {
             let coordinates = get_tile_coordinates(
                 context.selected_tile_id,
@@ -115,7 +123,8 @@ impl TileSelectState {
                 context.graphics.get_x_tiles_per_screen(),
                 None,
             );
-            renderer.highlight_selected_tile(
+            highlight_selected_tile(
+                renderer,
                 &context.graphics,
                 screen_tile_id,
                 &RendererColor::Red,

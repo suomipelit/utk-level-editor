@@ -1,6 +1,4 @@
-use common::graphics::Graphics;
 use common::render::{Color, Point, Rect, Renderer, RendererColor, Texture};
-use common::util::get_tile_coordinates;
 use sdl2::image::LoadTexture;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::render::TextureQuery;
@@ -67,22 +65,6 @@ impl<'a> Renderer<'a> for SdlRenderer {
         let mut canvas = self.canvas.borrow_mut();
         canvas.set_draw_color(to_sdl_color(&RendererColor::Black));
         canvas.clear();
-    }
-
-    fn highlight_selected_tile(&self, graphics: &Graphics, id: u32, color: &RendererColor) {
-        let render_size = graphics.get_render_size();
-        let render_multiplier = graphics.render_multiplier;
-        let (x_logical, y_logical) = get_tile_coordinates(
-            id,
-            graphics.get_x_tiles_per_screen() * graphics.tile_size,
-            graphics.tile_size,
-        );
-        let x = x_logical * render_multiplier;
-        let y = y_logical * render_multiplier;
-        self.draw_rect(
-            &Rect::new(x as i32, y as i32, render_size, render_size),
-            color,
-        );
     }
 
     fn draw_rect(&self, rect: &Rect, color: &RendererColor) {

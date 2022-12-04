@@ -1,4 +1,5 @@
 use crate::graphics::Graphics;
+use crate::util::get_tile_coordinates;
 
 pub enum RendererColor {
     Black,
@@ -100,7 +101,6 @@ pub trait Renderer<'a> {
 
     fn create_texture(&'a self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
     fn clear_screen(&self);
-    fn highlight_selected_tile(&self, graphics: &Graphics, id: u32, color: &RendererColor);
     fn draw_rect(&self, rect: &Rect, color: &RendererColor);
     fn draw_circle(&self, center: Point, radius: u32, color: &RendererColor);
     fn render_texture(&self, texture: &Self::Texture, src: Option<Rect>, dst: Rect);
@@ -116,4 +116,25 @@ pub fn get_texture_rect<T: Texture>(texture: &T, render_multiplier: u32) -> Rect
 pub fn get_texture_render_size<T: Texture>(texture: &T, render_multiplier: u32) -> (u32, u32) {
     let (width, height) = texture.size();
     (width * render_multiplier, height * render_multiplier)
+}
+
+pub fn highlight_selected_tile<'a, R: Renderer<'a>>(
+    renderer: &R,
+    graphics: &Graphics,
+    id: u32,
+    color: &RendererColor,
+) {
+    let render_size = graphics.get_render_size();
+    let render_multiplier = graphics.render_multiplier;
+    let (x_logical, y_logical) = get_tile_coordinates(
+        id,
+        graphics.get_x_tiles_per_screen() * graphics.tile_size,
+        graphics.tile_size,
+    );
+    let x = x_logical * render_multiplier;
+    let y = y_logical * render_multiplier;
+    renderer.draw_rect(
+        &Rect::new(x as i32, y as i32, render_size, render_size),
+        color,
+    );
 }
