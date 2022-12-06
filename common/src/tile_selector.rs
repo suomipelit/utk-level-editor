@@ -83,7 +83,7 @@ impl TileSelectState {
         Mode::TileSelect
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<R::Texture>) {
+    pub fn render<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let texture_selected = match context.texture_type_scrolled {
             TextureType::Floor => &context.textures.floor,

@@ -159,7 +159,7 @@ impl GeneralLevelInfoState {
         Mode::GeneralLevelInfo
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
+    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let mut option_position = (40, 20);
         let mut value_position = (300, option_position.1);

@@ -96,15 +96,15 @@ pub trait Texture {
     fn size(&self) -> (u32, u32);
 }
 
-pub trait Renderer<'a> {
+pub trait Renderer {
     type Texture: Texture;
 
-    fn create_texture(&'a self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
-    fn clear_screen(&self);
-    fn draw_rect(&self, rect: &Rect, color: &RendererColor);
-    fn draw_circle(&self, center: Point, radius: u32, color: &RendererColor);
-    fn render_texture(&self, texture: &Self::Texture, src: Option<Rect>, dst: Rect);
-    fn fill_and_render_texture(&self, color: RendererColor, texture: &Self::Texture, dst: Rect);
+    fn create_texture(&mut self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
+    fn clear_screen(&mut self);
+    fn draw_rect(&mut self, rect: &Rect, color: &RendererColor);
+    fn draw_circle(&mut self, center: Point, radius: u32, color: &RendererColor);
+    fn render_texture(&mut self, texture: &Self::Texture, src: Option<Rect>, dst: Rect);
+    fn fill_and_render_texture(&mut self, color: RendererColor, texture: &Self::Texture, dst: Rect);
     fn window_size(&self) -> (u32, u32);
 }
 
@@ -118,8 +118,8 @@ pub fn get_texture_render_size<T: Texture>(texture: &T, render_multiplier: u32) 
     (width * render_multiplier, height * render_multiplier)
 }
 
-pub fn highlight_selected_tile<'a, R: Renderer<'a>>(
-    renderer: &R,
+pub fn highlight_selected_tile<R: Renderer>(
+    renderer: &mut R,
     graphics: &Graphics,
     id: u32,
     color: &RendererColor,

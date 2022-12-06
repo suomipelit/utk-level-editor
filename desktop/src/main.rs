@@ -48,7 +48,9 @@ pub fn main() {
         .build()
         .unwrap();
     let mut event_pump = sdl.event_pump().unwrap();
-    let renderer = SdlRenderer::new(window);
+    let mut canvas = window.into_canvas().build().unwrap();
+    let texture_creator = canvas.texture_creator();
+    let mut renderer = SdlRenderer::new(&mut canvas, &texture_creator);
     let fn2 = {
         let mut font_data = Vec::new();
         File::open("assets/TETRIS.FN2")
@@ -57,8 +59,8 @@ pub fn main() {
             .unwrap();
         FN2::parse(&font_data)
     };
-    let font = Font::new(&renderer, &fn2);
-    let textures = get_textures(&renderer);
+    let font = Font::new(&mut renderer, &fn2);
+    let textures = get_textures(&mut renderer);
     let mut context = Context {
         graphics,
         fn2,
@@ -82,7 +84,7 @@ pub fn main() {
         for sdl_event in event_pump.poll_iter() {
             if let Some(event) = convert_event(sdl_event) {
                 if let Event::Window { win_event } = event {
-                    resize(&renderer, &mut context, win_event);
+                    resize(&mut renderer, &mut context, win_event);
                 }
                 match state.handle_event(&mut context, &text_input, event) {
                     RunState::Quit => return,
@@ -90,28 +92,20 @@ pub fn main() {
                 }
             }
         }
-        state.render(&renderer, &context);
+        state.render(&mut renderer, &context);
         renderer.present();
         std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
 
-fn refresh<'a>(
-    renderer: &'a SdlRenderer,
-    context: &mut Context<SdlTexture<'a>>,
-    window_size: (u32, u32),
-) {
+fn refresh(renderer: &mut SdlRenderer, context: &mut Context<SdlTexture>, window_size: (u32, u32)) {
     context.graphics.resolution_x = window_size.0;
     context.graphics.resolution_y = window_size.1;
     context.font = Font::new(renderer, &context.fn2);
     context.textures = get_textures(renderer);
 }
 
-pub fn resize<'a>(
-    renderer: &'a SdlRenderer,
-    context: &mut Context<SdlTexture<'a>>,
-    event: WindowEvent,
-) {
+pub fn resize(renderer: &mut SdlRenderer, context: &mut Context<SdlTexture>, event: WindowEvent) {
     match event {
         WindowEvent::Resized { width, height } => {
             refresh(renderer, context, (width, height));
@@ -122,7 +116,7 @@ pub fn resize<'a>(
     }
 }
 
-pub fn get_textures<'a>(renderer: &'a SdlRenderer) -> Textures<SdlTexture<'a>> {
+pub fn get_textures(renderer: &mut SdlRenderer) -> Textures<SdlTexture> {
     Textures {
         floor: renderer.load_texture("assets/FLOOR1.PNG"),
         walls: renderer.load_texture("assets/WALLS1.PNG"),

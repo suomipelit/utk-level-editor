@@ -18,7 +18,7 @@ pub struct Font<T> {
 }
 
 impl<T> Font<T> {
-    pub fn new<'a, R: Renderer<'a, Texture = T>>(renderer: &'a R, fn2: &FN2) -> Self {
+    pub fn new<R: Renderer<Texture = T>>(renderer: &mut R, fn2: &FN2) -> Self {
         let glyphs = fn2
             .characters
             .iter()
@@ -31,8 +31,8 @@ impl<T> Font<T> {
         Self { glyphs }
     }
 
-    fn create_glyph_texture<'a, R: Renderer<'a, Texture = T>>(
-        renderer: &'a R,
+    fn create_glyph_texture<R: Renderer<Texture = T>>(
+        renderer: &mut R,
         character: &Character,
     ) -> T {
         let char_width = character.width;
@@ -74,9 +74,9 @@ impl<T> Font<T> {
         renderer.create_texture(glyph_width, glyph_height, &pixels)
     }
 
-    pub fn render_text_relative<'a, R: Renderer<'a, Texture = T>>(
+    pub fn render_text_relative<R: Renderer<Texture = T>>(
         &self,
-        renderer: &R,
+        renderer: &mut R,
         text: &str,
         origo: (i32, i32),
         pos: (u32, u32),
@@ -104,9 +104,9 @@ impl<T> Font<T> {
         }
     }
 
-    pub fn render_text<'a, R: Renderer<'a, Texture = T>>(
+    pub fn render_text<R: Renderer<Texture = T>>(
         &self,
-        renderer: &'a R,
+        renderer: &mut R,
         text: &str,
         pos: (u32, u32),
     ) {

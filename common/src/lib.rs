@@ -87,7 +87,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
         }
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
+    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
         match self.mode {
             Mode::Editor => self.editor.render(renderer, context),
             Mode::TileSelect => self.tile_select.render(renderer, context),

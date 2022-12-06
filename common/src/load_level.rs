@@ -67,7 +67,7 @@ impl<L: LevelLister> LoadLevelState<L> {
         Mode::LoadLevel
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
+    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let text_position = (40, 60);
         context

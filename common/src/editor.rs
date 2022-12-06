@@ -533,7 +533,7 @@ impl<W: LevelWriter> EditorState<W> {
         Mode::Editor
     }
 
-    pub fn render<'a, R: Renderer<'a>>(&mut self, renderer: &'a R, context: &Context<R::Texture>) {
+    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
         self.render_level(renderer, context);
 
         let highlighted_id = get_tile_id_from_coordinates(
@@ -636,7 +636,7 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_level<'a, R: Renderer<'a>>(&self, renderer: &'a R, context: &Context<R::Texture>) {
+    fn render_level<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
         renderer.clear_screen();
         let level = &context.level;
         let graphics = &context.graphics;
@@ -732,9 +732,9 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_input_prompt<'a, R: Renderer<'a>>(
+    fn render_input_prompt<R: Renderer>(
         &self,
-        renderer: &'a R,
+        renderer: &mut R,
         context: &Context<R::Texture>,
         prompt_position: (u32, u32),
         prompt_line_spacing: u32,
@@ -763,9 +763,9 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_prompt_if_needed<'a, R: Renderer<'a>>(
+    fn render_prompt_if_needed<R: Renderer>(
         &self,
-        renderer: &'a R,
+        renderer: &mut R,
         context: &Context<R::Texture>,
     ) {
         if self.prompt != PromptType::None {

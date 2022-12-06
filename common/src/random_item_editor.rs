@@ -96,9 +96,9 @@ impl RandomItemEditorState {
         Mode::RandomItemEditor(game_type)
     }
 
-    pub fn render<'a, R: Renderer<'a>>(
+    pub fn render<R: Renderer>(
         &mut self,
-        renderer: &'a R,
+        renderer: &mut R,
         context: &Context<R::Texture>,
         game_type: GameType,
     ) {
