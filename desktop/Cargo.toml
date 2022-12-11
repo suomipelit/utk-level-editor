@@ -1,5 +1,5 @@
 [package]
-name = "ultimatetapankaikki-editor"
+name = "utk-level-editor"
 version = "0.1.0"
 edition = "2021"
 

@@ -637,7 +637,6 @@ impl<W: LevelWriter> EditorState<W> {
     }
 
     fn render_level<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
-        renderer.clear_screen();
         let level = &context.level;
         let graphics = &context.graphics;
         let textures = &context.textures;

@@ -45,6 +45,13 @@ impl From<(u8, u8, u8, u8)> for Color {
     }
 }
 
+impl Color {
+    pub fn to_u32(&self) -> u32 {
+        let Color { r, g, b, a } = *self;
+        (a as u32) << 24 | (b as u32) << 16 | (g as u32) << 8 | r as u32
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct Point {
     pub x: i32,
