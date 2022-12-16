@@ -70,9 +70,7 @@ impl TileSelectState {
                     texture_width / context.graphics.get_render_size(),
                     None,
                 );
-                if clicked_tile_id
-                    < get_number_of_tiles_in_texture(texture_selected, context.graphics.tile_size)
-                {
+                if clicked_tile_id < get_number_of_tiles_in_texture(texture_selected) {
                     context.selected_tile_id = clicked_tile_id;
                     context.texture_type_selected = context.texture_type_scrolled;
                     return Mode::Editor;
@@ -111,7 +109,6 @@ impl TileSelectState {
             let coordinates = get_tile_coordinates(
                 context.selected_tile_id,
                 texture_width / context.graphics.render_multiplier,
-                context.graphics.tile_size,
             );
             let render_multiplier = context.graphics.render_multiplier;
             let screen_tile_id = get_tile_id_from_coordinates(

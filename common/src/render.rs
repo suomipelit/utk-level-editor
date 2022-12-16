@@ -1,4 +1,5 @@
 use crate::graphics::Graphics;
+use crate::level::TILE_SIZE;
 use crate::util::get_tile_coordinates;
 
 pub enum RendererColor {
@@ -133,11 +134,8 @@ pub fn highlight_selected_tile<R: Renderer>(
 ) {
     let render_size = graphics.get_render_size();
     let render_multiplier = graphics.render_multiplier;
-    let (x_logical, y_logical) = get_tile_coordinates(
-        id,
-        graphics.get_x_tiles_per_screen() * graphics.tile_size,
-        graphics.tile_size,
-    );
+    let (x_logical, y_logical) =
+        get_tile_coordinates(id, graphics.get_x_tiles_per_screen() * TILE_SIZE);
     let x = x_logical * render_multiplier;
     let y = y_logical * render_multiplier;
     renderer.draw_rect(

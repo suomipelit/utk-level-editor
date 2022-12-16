@@ -1,6 +1,7 @@
 use std::cmp;
 
 use crate::graphics::Graphics;
+use crate::level::TILE_SIZE;
 use crate::render::{Point, Texture};
 use crate::types::Trigonometry;
 
@@ -10,9 +11,9 @@ pub fn get_bottom_text_position(resolution_y: u32) -> (u32, u32) {
     (TITLE_POSITION.0, resolution_y - 26)
 }
 
-pub fn get_tile_coordinates(id: u32, width: u32, tile_size: u32) -> (u32, u32) {
-    let x = id * tile_size % width;
-    let y = id * tile_size / width * tile_size;
+pub fn get_tile_coordinates(id: u32, width: u32) -> (u32, u32) {
+    let x = id * TILE_SIZE % width;
+    let y = id * TILE_SIZE / width * TILE_SIZE;
     (x, y)
 }
 
@@ -23,11 +24,10 @@ pub fn get_logical_coordinates(
     scroll: Option<(u32, u32)>,
 ) -> (u32, u32) {
     let render_multiplier = graphics.render_multiplier;
-    let tile_size = graphics.tile_size;
     let scroll = scroll.unwrap_or((0, 0));
     (
-        x / render_multiplier / tile_size + scroll.0,
-        y / render_multiplier / tile_size + scroll.1,
+        x / render_multiplier / TILE_SIZE + scroll.0,
+        y / render_multiplier / TILE_SIZE + scroll.1,
     )
 }
 
@@ -63,10 +63,9 @@ pub fn get_level_coordinates_from_screen_coordinates(
     scroll: &(u32, u32),
 ) -> (u32, u32) {
     let render_multiplier = graphics.render_multiplier;
-    let tile_size = graphics.tile_size;
     (
-        coordinates.0 / render_multiplier + scroll.0 * tile_size,
-        coordinates.1 / render_multiplier + scroll.1 * tile_size,
+        coordinates.0 / render_multiplier + scroll.0 * TILE_SIZE,
+        coordinates.1 / render_multiplier + scroll.1 * TILE_SIZE,
     )
 }
 
@@ -153,9 +152,9 @@ pub fn limit_coordinates(coordinates: &(u32, u32), limit: &(u32, u32)) -> (u32, 
     )
 }
 
-pub fn get_number_of_tiles_in_texture<T: Texture>(texture: &T, tile_size: u32) -> u32 {
+pub fn get_number_of_tiles_in_texture<T: Texture>(texture: &T) -> u32 {
     let (width, height) = texture.size();
-    width / tile_size * height / tile_size
+    width / TILE_SIZE * height / TILE_SIZE
 }
 
 impl Trigonometry {

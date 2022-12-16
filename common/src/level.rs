@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use crate::types::*;
 use crate::util::*;
 
+pub const TILE_SIZE: u32 = 20;
+
 #[derive(Clone, Copy)]
 pub enum CrateClass {
     Weapon = 0,

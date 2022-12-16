@@ -3,10 +3,10 @@ use std::marker::PhantomData;
 use crate::context::Context;
 use crate::event::{Event, Keycode, MouseButton};
 use crate::graphics::Graphics;
-use crate::level::Level;
 use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
 use crate::level::{CrateClass, StaticCrate};
+use crate::level::{Level, TILE_SIZE};
 use crate::render::{highlight_selected_tile, Point, Rect, Renderer, RendererColor, Texture};
 use crate::types::GameType;
 use crate::types::{Mode, TextureType};
@@ -534,6 +534,10 @@ impl<W: LevelWriter> EditorState<W> {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
+        // Clear screen if the whole screen is not drawn by rendering the level:
+        // - level is smaller than the screen
+        // - level is bigger than the screen but the screen is scrolled to the end and screen size is not a multiple of tile size
+        // TODO
         self.render_level(renderer, context);
 
         let highlighted_id = get_tile_id_from_coordinates(
@@ -658,11 +662,7 @@ impl<W: LevelWriter> EditorState<W> {
                     TextureType::Shadow => unreachable!(),
                 };
                 let (texture_width, _) = texture.size();
-                let src = get_block(
-                    level.tiles[y_index][x_index].id,
-                    texture_width,
-                    graphics.tile_size,
-                );
+                let src = get_block(level.tiles[y_index][x_index].id, texture_width);
                 let (x_absolute, y_absolute) =
                     get_absolute_coordinates_from_logical(x, y, graphics.get_render_size());
                 let dst = Rect::new(x_absolute, y_absolute, render_size, render_size);
@@ -672,7 +672,6 @@ impl<W: LevelWriter> EditorState<W> {
                     let src = get_block(
                         level.tiles[y_index][x_index].shadow - 1,
                         shadow_texture_width,
-                        graphics.tile_size,
                     );
                     renderer.render_texture(&textures.shadows, Some(src), dst);
                 }
@@ -975,7 +974,7 @@ fn get_limited_screen_level_size(
     )
 }
 
-fn get_block(id: u32, width: u32, tile_size: u32) -> Rect {
-    let (x, y) = get_tile_coordinates(id, width, tile_size);
-    Rect::new(x as i32, y as i32, tile_size, tile_size)
+fn get_block(id: u32, width: u32) -> Rect {
+    let (x, y) = get_tile_coordinates(id, width);
+    Rect::new(x as i32, y as i32, TILE_SIZE, TILE_SIZE)
 }
