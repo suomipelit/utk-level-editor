@@ -534,10 +534,7 @@ impl<W: LevelWriter> EditorState<W> {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
-        // Clear screen if the whole screen is not drawn by rendering the level:
-        // - level is smaller than the screen
-        // - level is bigger than the screen but the screen is scrolled to the end and screen size is not a multiple of tile size
-        // TODO
+        renderer.clear_screen_if_needed();
         self.render_level(renderer, context);
 
         let highlighted_id = get_tile_id_from_coordinates(

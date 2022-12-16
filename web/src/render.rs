@@ -1,3 +1,4 @@
+use common::level::TILE_SIZE;
 use common::render::{Color, Point, Rect, Renderer, RendererColor, Texture};
 
 pub struct CanvasTexture {
@@ -16,6 +17,7 @@ pub struct CanvasRenderer {
     width: u32,
     height: u32,
     screen: Vec<u32>,
+    exact_to_tile_size: bool,
 }
 
 impl CanvasRenderer {
@@ -24,6 +26,7 @@ impl CanvasRenderer {
             width,
             height,
             screen: vec![0; (width * height * 4) as usize],
+            exact_to_tile_size: width % TILE_SIZE == 0 && height % TILE_SIZE == 0,
         }
     }
 
@@ -117,6 +120,12 @@ impl Renderer for CanvasRenderer {
     fn clear_screen(&mut self) {
         let c = Color::from((0, 0, 0, 255)).to_u32();
         self.screen.fill(c);
+    }
+
+    fn clear_screen_if_needed(&mut self) {
+        if !self.exact_to_tile_size {
+            self.clear_screen();
+        }
     }
 
     fn draw_rect(&mut self, rect: &Rect, color: &RendererColor) {

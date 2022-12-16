@@ -93,6 +93,10 @@ impl<'a> Renderer for SdlRenderer<'a> {
         self.canvas.clear();
     }
 
+    fn clear_screen_if_needed(&mut self) {
+        self.clear_screen();
+    }
+
     fn draw_rect(&mut self, rect: &Rect, color: &RendererColor) {
         self.canvas.set_draw_color(to_sdl_color(color));
         self.canvas

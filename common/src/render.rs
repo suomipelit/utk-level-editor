@@ -109,6 +109,7 @@ pub trait Renderer {
 
     fn create_texture(&mut self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
     fn clear_screen(&mut self);
+    fn clear_screen_if_needed(&mut self);
     fn draw_rect(&mut self, rect: &Rect, color: &RendererColor);
     fn draw_circle(&mut self, center: Point, radius: u32, color: &RendererColor);
     fn render_texture(&mut self, texture: &Self::Texture, src: Option<Rect>, dst: Rect);
