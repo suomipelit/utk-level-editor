@@ -61,7 +61,7 @@ impl LevelEditor {
 
         let mut renderer = CanvasRenderer::new(width, height);
         let fn2 = FN2::parse(font_data);
-        let font = Font::new(&mut renderer, &fn2);
+        let font = Font::new(&mut renderer, &fn2, 1);
         let textures = Textures {
             floor: renderer.create_texture_rgba(
                 floor_texture.width,

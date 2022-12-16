@@ -48,12 +48,11 @@ impl HelpState {
 
     pub fn render<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
         renderer.clear_screen();
+        let font = &context.font;
         let mut position = 6;
         for line_text in &LINES {
-            context
-                .font
-                .render_text(renderer, line_text, (10, position));
-            position += 22;
+            font.render_text(renderer, line_text, (10, position));
+            position += font.line_height + 2;
         }
     }
 }

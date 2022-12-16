@@ -59,7 +59,7 @@ pub fn main() {
             .unwrap();
         FN2::parse(&font_data)
     };
-    let font = Font::new(&mut renderer, &fn2);
+    let font = Font::new(&mut renderer, &fn2, 2);
     let textures = get_textures(&mut renderer);
     let mut context = Context {
         graphics,
@@ -101,7 +101,7 @@ pub fn main() {
 fn refresh(renderer: &mut SdlRenderer, context: &mut Context<SdlTexture>, window_size: (u32, u32)) {
     context.graphics.resolution_x = window_size.0;
     context.graphics.resolution_y = window_size.1;
-    context.font = Font::new(renderer, &context.fn2);
+    context.font = Font::new(renderer, &context.fn2, 2);
     context.textures = get_textures(renderer);
 }
 

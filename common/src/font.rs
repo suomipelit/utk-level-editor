@@ -2,7 +2,6 @@ use crate::fn2::{Character, FN2};
 use crate::render::{Color, Rect, Renderer};
 use std::cmp::max;
 
-const TEXT_SIZE_MULTIPLIER: u32 = 2;
 const INDEX_OFFSET: usize = 33;
 const SPACE_WIDTH: u32 = 5;
 const TEXT_SHADOW_PIXELS: u32 = 1;
@@ -14,11 +13,17 @@ struct Glyph<T> {
 }
 
 pub struct Font<T> {
+    text_size_multiplier: u32,
     glyphs: Vec<Glyph<T>>,
+    pub line_height: u32,
 }
 
 impl<T> Font<T> {
-    pub fn new<R: Renderer<Texture = T>>(renderer: &mut R, fn2: &FN2) -> Self {
+    pub fn new<R: Renderer<Texture = T>>(
+        renderer: &mut R,
+        fn2: &FN2,
+        text_size_multiplier: u32,
+    ) -> Self {
         let glyphs = fn2
             .characters
             .iter()
@@ -28,7 +33,12 @@ impl<T> Font<T> {
                 texture: Self::create_glyph_texture(renderer, character),
             })
             .collect::<Vec<_>>();
-        Self { glyphs }
+        let line_height = glyphs[0].height;
+        Self {
+            text_size_multiplier,
+            glyphs,
+            line_height,
+        }
     }
 
     fn create_glyph_texture<R: Renderer<Texture = T>>(
@@ -86,7 +96,7 @@ impl<T> Font<T> {
         for c in text.chars() {
             let c = c as usize;
             if c < INDEX_OFFSET {
-                x += (SPACE_WIDTH * TEXT_SIZE_MULTIPLIER) as i32;
+                x += (SPACE_WIDTH * self.text_size_multiplier) as i32;
             } else {
                 let glyph = &self.glyphs[c - INDEX_OFFSET];
                 renderer.render_texture(
@@ -95,11 +105,11 @@ impl<T> Font<T> {
                     Rect::new(
                         x,
                         y,
-                        glyph.width * TEXT_SIZE_MULTIPLIER,
-                        glyph.height * TEXT_SIZE_MULTIPLIER,
+                        glyph.width * self.text_size_multiplier,
+                        glyph.height * self.text_size_multiplier,
                     ),
                 );
-                x += (glyph.width * TEXT_SIZE_MULTIPLIER) as i32;
+                x += (glyph.width * self.text_size_multiplier) as i32;
             }
         }
     }
@@ -119,11 +129,11 @@ impl<T> Font<T> {
         for c in text.chars() {
             let c = c as usize;
             if c < INDEX_OFFSET {
-                x += SPACE_WIDTH * TEXT_SIZE_MULTIPLIER;
+                x += SPACE_WIDTH * self.text_size_multiplier;
             } else {
                 let glyph = &self.glyphs[c - INDEX_OFFSET];
-                x += glyph.width * TEXT_SIZE_MULTIPLIER;
-                y = max(y, glyph.height * TEXT_SIZE_MULTIPLIER);
+                x += glyph.width * self.text_size_multiplier;
+                y = max(y, glyph.height * self.text_size_multiplier);
             }
         }
         (x, y)
