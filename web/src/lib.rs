@@ -57,8 +57,7 @@ impl LevelEditor {
         let width = 320u32;
         let height = 200u32;
 
-        let mut graphics = Graphics::new();
-        graphics.render_multiplier = 1;
+        let graphics = Graphics::new((width, height), 1);
 
         let mut renderer = CanvasRenderer::new(width, height);
         let fn2 = FN2::parse(font_data);

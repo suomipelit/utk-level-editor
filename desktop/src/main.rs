@@ -36,7 +36,7 @@ pub fn main() {
     let sdl = sdl2::init().unwrap();
     let _image_context = sdl2::image::init(InitFlag::PNG);
     let video_subsystem = sdl.video().unwrap();
-    let graphics = Graphics::new();
+    let graphics = Graphics::new((1280, 720), 2);
     let window = video_subsystem
         .window(
             "Ultimate Tapan Kaikki - Level Editor",

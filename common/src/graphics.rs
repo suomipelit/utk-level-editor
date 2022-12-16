@@ -7,15 +7,11 @@ pub struct Graphics {
 }
 
 impl Graphics {
-    const RENDER_MULTIPLIER: u32 = 2;
-    const RESOLUTION_X: u32 = 1280;
-    const RESOLUTION_Y: u32 = 720;
-
-    pub fn new() -> Graphics {
+    pub fn new(resolution: (u32, u32), render_multiplier: u32) -> Graphics {
         Graphics {
-            render_multiplier: Graphics::RENDER_MULTIPLIER,
-            resolution_x: Graphics::RESOLUTION_X,
-            resolution_y: Graphics::RESOLUTION_Y,
+            render_multiplier,
+            resolution_x: resolution.0,
+            resolution_y: resolution.1,
         }
     }
 
