@@ -54,8 +54,8 @@ impl LevelEditor {
 
         info!("Start");
 
-        let width = 320u32;
-        let height = 200u32;
+        let width = 640u32;
+        let height = 400u32;
 
         let graphics = Graphics::new((width, height), 1);
 
