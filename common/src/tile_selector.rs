@@ -106,7 +106,8 @@ impl TileSelectState {
         };
         let render_multiplier = context.graphics.render_multiplier;
         let dst = get_texture_rect(texture_selected, render_multiplier);
-        renderer.fill_and_render_texture(RendererColor::LightGrey, texture_selected, dst);
+        renderer.fill_rect(&dst, RendererColor::LightGrey);
+        renderer.render_texture(&texture_selected, None, dst);
         let (texture_width, texture_height) =
             get_texture_render_size(texture_selected, render_multiplier);
         let highlighted_id = get_tile_id_from_coordinates(
@@ -119,7 +120,7 @@ impl TileSelectState {
             renderer,
             &context.graphics,
             highlighted_id,
-            &RendererColor::White,
+            RendererColor::White,
         );
         if context.texture_type_selected == context.texture_type_scrolled {
             let coordinates = get_tile_coordinates(
@@ -140,7 +141,7 @@ impl TileSelectState {
                 renderer,
                 &context.graphics,
                 screen_tile_id,
-                &RendererColor::Red,
+                RendererColor::Red,
             );
         }
         let active_text = match context.texture_type_scrolled {

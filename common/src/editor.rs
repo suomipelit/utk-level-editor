@@ -553,7 +553,7 @@ impl<W: LevelWriter> EditorState<W> {
             renderer,
             &context.graphics,
             highlighted_id,
-            &RendererColor::White,
+            RendererColor::White,
         );
         let render_size = context.graphics.get_render_size();
         context.font.render_text_relative(
@@ -627,7 +627,7 @@ impl<W: LevelWriter> EditorState<W> {
                         renderer,
                         &context.graphics,
                         screen_tile_id,
-                        &RendererColor::White,
+                        RendererColor::White,
                     );
                 }
             }
@@ -681,7 +681,7 @@ impl<W: LevelWriter> EditorState<W> {
             renderer.draw_circle(
                 center,
                 get_spotlight_render_radius(spotlight),
-                &RendererColor::Blue,
+                RendererColor::Blue,
             );
         }
         for (coordinates, steam) in &level.steams {
@@ -695,7 +695,7 @@ impl<W: LevelWriter> EditorState<W> {
                         center.y + (trigonometry.cos[steam.angle as usize] * multiplier) as i32,
                     ),
                     get_steam_render_radius() + x * 2,
-                    &RendererColor::Red,
+                    RendererColor::Red,
                 );
             }
         }
@@ -705,8 +705,8 @@ impl<W: LevelWriter> EditorState<W> {
             let pos =
                 get_screen_coordinates_from_level_coordinates(graphics, coordinates, &level.scroll);
             let color = match crate_item.crate_variant {
-                StaticCrate::Normal => &RendererColor::LightGreen,
-                StaticCrate::Deathmatch => &RendererColor::LightBlue,
+                StaticCrate::Normal => RendererColor::LightGreen,
+                StaticCrate::Deathmatch => RendererColor::LightBlue,
             };
             renderer.draw_rect(&Rect::new(pos.x, pos.y, box_size, box_size), color);
             renderer.draw_rect(

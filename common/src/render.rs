@@ -2,6 +2,7 @@ use crate::graphics::Graphics;
 use crate::level::TILE_SIZE;
 use crate::util::get_tile_coordinates;
 
+#[derive(Clone, Copy)]
 pub enum RendererColor {
     Black,
     White,
@@ -117,10 +118,10 @@ pub trait Renderer {
 
     fn create_texture(&mut self, width: u32, height: u32, data: &[Color]) -> Self::Texture;
     fn clear_screen(&mut self);
-    fn draw_rect(&mut self, rect: &Rect, color: &RendererColor);
-    fn draw_circle(&mut self, center: Point, radius: u32, color: &RendererColor);
+    fn draw_rect(&mut self, rect: &Rect, color: RendererColor);
+    fn fill_rect(&mut self, rect: &Rect, color: RendererColor);
+    fn draw_circle(&mut self, center: Point, radius: u32, color: RendererColor);
     fn render_texture(&mut self, texture: &Self::Texture, src: Option<Rect>, dst: Rect);
-    fn fill_and_render_texture(&mut self, color: RendererColor, texture: &Self::Texture, dst: Rect);
     fn window_size(&self) -> (u32, u32);
 }
 
@@ -138,7 +139,7 @@ pub fn highlight_selected_tile<R: Renderer>(
     renderer: &mut R,
     graphics: &Graphics,
     id: u32,
-    color: &RendererColor,
+    color: RendererColor,
 ) {
     let render_size = graphics.get_render_size();
     let render_multiplier = graphics.render_multiplier;

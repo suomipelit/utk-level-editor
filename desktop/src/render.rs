@@ -58,7 +58,7 @@ impl<'a> SdlRenderer<'a> {
 
     pub fn clear_screen_before_render(&mut self) {
         self.canvas
-            .set_draw_color(to_sdl_color(&RendererColor::Black));
+            .set_draw_color(to_sdl_color(RendererColor::Black));
         self.canvas.clear();
     }
 
@@ -97,7 +97,7 @@ impl<'a> Renderer for SdlRenderer<'a> {
         // Nothing to do here: clear_screen_before_render() is used before every frame.
     }
 
-    fn draw_rect(&mut self, rect: &Rect, color: &RendererColor) {
+    fn draw_rect(&mut self, rect: &Rect, color: RendererColor) {
         self.canvas.set_draw_color(to_sdl_color(color));
         self.canvas
             .draw_line(
@@ -125,7 +125,12 @@ impl<'a> Renderer for SdlRenderer<'a> {
             .unwrap();
     }
 
-    fn draw_circle(&mut self, center: Point, radius: u32, color: &RendererColor) {
+    fn fill_rect(&mut self, rect: &Rect, color: RendererColor) {
+        self.canvas.set_draw_color(to_sdl_color(color));
+        self.canvas.fill_rect(Some(to_sdl_rect(*rect))).unwrap();
+    }
+
+    fn draw_circle(&mut self, center: Point, radius: u32, color: RendererColor) {
         self.canvas.set_draw_color(to_sdl_color(color));
 
         // https://stackoverflow.com/a/48291620
@@ -173,25 +178,12 @@ impl<'a> Renderer for SdlRenderer<'a> {
             .unwrap();
     }
 
-    fn fill_and_render_texture(
-        &mut self,
-        color: RendererColor,
-        texture: &Self::Texture,
-        dst: Rect,
-    ) {
-        self.canvas.set_draw_color(to_sdl_color(&color));
-        self.canvas.fill_rect(Some(to_sdl_rect(dst))).unwrap();
-
-        let t = self.textures.get(&texture.index).unwrap();
-        self.canvas.copy(t, None, Some(to_sdl_rect(dst))).unwrap();
-    }
-
     fn window_size(&self) -> (u32, u32) {
         self.canvas.window().size()
     }
 }
 
-fn to_sdl_color(render_color: &RendererColor) -> sdl2::pixels::Color {
+fn to_sdl_color(render_color: RendererColor) -> sdl2::pixels::Color {
     let color = render_color.to_color();
     sdl2::pixels::Color::RGB(color.r, color.g, color.b)
 }

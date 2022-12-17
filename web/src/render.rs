@@ -119,7 +119,7 @@ impl Renderer for CanvasRenderer {
         self.screen.fill(c);
     }
 
-    fn draw_rect(&mut self, rect: &Rect, color: &RendererColor) {
+    fn draw_rect(&mut self, rect: &Rect, color: RendererColor) {
         let color = color.to_color();
         self.draw_horizontal_line(rect.y, rect.x, rect.x + rect.width as i32 - 1, color);
         self.draw_horizontal_line(
@@ -137,7 +137,23 @@ impl Renderer for CanvasRenderer {
         );
     }
 
-    fn draw_circle(&mut self, center: Point, radius: u32, color: &RendererColor) {
+    fn fill_rect(&mut self, rect: &Rect, color: RendererColor) {
+        let c = color.to_color().to_u32();
+        for y in rect.y..rect.y + rect.height as i32 {
+            if y < 0 || y >= self.height as i32 {
+                continue;
+            }
+            let di_start = (y * self.width as i32) as usize;
+            for x in rect.x..rect.x + rect.width as i32 {
+                if x < 0 || x >= self.width as i32 {
+                    continue;
+                }
+                self.screen[di_start + x as usize] = c;
+            }
+        }
+    }
+
+    fn draw_circle(&mut self, center: Point, radius: u32, color: RendererColor) {
         // https://stackoverflow.com/a/48291620
         let c = color.to_color().to_u32();
         let diameter = (radius * 2) as i32;
@@ -216,15 +232,6 @@ impl Renderer for CanvasRenderer {
                 }
             }
         }
-    }
-
-    fn fill_and_render_texture(
-        &mut self,
-        _color: RendererColor,
-        texture: &Self::Texture,
-        dst: Rect,
-    ) {
-        self.render_texture(texture, None, dst);
     }
 
     fn window_size(&self) -> (u32, u32) {
