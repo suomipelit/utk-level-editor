@@ -6,6 +6,7 @@ use crate::render::{
 };
 use crate::types::*;
 use crate::util::*;
+use crate::EventResult;
 
 pub struct TileSelectState;
 
@@ -14,18 +15,18 @@ impl TileSelectState {
         TileSelectState
     }
 
-    pub fn handle_event<T: Texture>(&self, context: &mut Context<T>, event: Event) -> Mode {
+    pub fn handle_event<T: Texture>(&self, context: &mut Context<T>, event: Event) -> EventResult {
         match event {
             Event::Quit
             | Event::KeyDown {
                 keycode: Keycode::Escape,
-            } => return Mode::Editor,
+            } => return EventResult::ChangeMode(Mode::Editor),
             Event::Window { .. } => {
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::KeyDown { keycode } => match keycode {
                 Keycode::Space => {
-                    return Mode::Editor;
+                    return EventResult::ChangeMode(Mode::Editor);
                 }
                 Keycode::PageDown => {
                     context.texture_type_scrolled =
@@ -47,7 +48,7 @@ impl TileSelectState {
                             TextureType::Floor
                         }
                 }
-                _ => {}
+                _ => return EventResult::EventIgnored,
             },
             Event::MouseMotion { x, y, .. } => {
                 context.mouse.0 = x as u32;
@@ -73,12 +74,12 @@ impl TileSelectState {
                 if clicked_tile_id < get_number_of_tiles_in_texture(texture_selected) {
                     context.selected_tile_id = clicked_tile_id;
                     context.texture_type_selected = context.texture_type_scrolled;
-                    return Mode::Editor;
+                    return EventResult::ChangeMode(Mode::Editor);
                 }
             }
-            _ => {}
+            _ => return EventResult::EventIgnored,
         }
-        Mode::TileSelect
+        EventResult::KeepMode
     }
 
     pub fn render<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {

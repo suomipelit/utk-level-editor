@@ -37,34 +37,34 @@ export async function run() {
     const keycode = toKeycode(event.key)
     if (keycode !== undefined) {
       event.preventDefault()
-      state.key_down(keycode)
+      const needsRender = state.key_down(keycode)
+      if (needsRender) renderFrame()
     }
-    renderFrame()
   })
   canvas.addEventListener("mousemove", (event) => {
-    state.mouse_move(
+    const needsRender = state.mouse_move(
       (event.offsetX / canvas.clientWidth) * state.screen_width(),
       (event.offsetY / canvas.clientHeight) * state.screen_height()
     )
-    renderFrame()
+    if (needsRender) renderFrame()
   })
   canvas.addEventListener("mousedown", (event) => {
-    if (event.button === 0) {
-      state.mouse_down(MouseButton.Left)
-    }
-    if (event.button === 2) {
-      state.mouse_down(MouseButton.Right)
-    }
-    renderFrame()
+    const needsRender =
+      event.button === 0
+        ? state.mouse_down(MouseButton.Left)
+        : event.button === 2
+        ? state.mouse_down(MouseButton.Right)
+        : false
+    if (needsRender) renderFrame()
   })
   canvas.addEventListener("mouseup", (event) => {
-    if (event.button === 0) {
-      state.mouse_up(MouseButton.Left)
-    }
-    if (event.button === 2) {
-      state.mouse_up(MouseButton.Right)
-    }
-    renderFrame()
+    const needsRender =
+      event.button === 0
+        ? state.mouse_up(MouseButton.Left)
+        : event.button === 2
+        ? state.mouse_up(MouseButton.Right)
+        : false
+    if (needsRender) renderFrame()
   })
 }
 

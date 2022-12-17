@@ -39,7 +39,6 @@ pub enum Mode {
     GeneralLevelInfo,
     RandomItemEditor(GameType),
     LoadLevel,
-    Quit,
 }
 
 pub struct Trigonometry {

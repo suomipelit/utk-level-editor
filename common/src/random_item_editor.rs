@@ -5,7 +5,7 @@ use crate::level::ALL_CRATES;
 use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::{get_bottom_text_position, TITLE_POSITION};
-use crate::TextInput;
+use crate::{EventResult, TextInput};
 
 fn get_value(level: &Level, game_type: &GameType, index: usize) -> u32 {
     let crates = match game_type {
@@ -56,17 +56,17 @@ impl RandomItemEditorState {
         text_input: &I,
         game_type: GameType,
         event: Event,
-    ) -> Mode {
+    ) -> EventResult {
         match event {
             Event::Quit { .. }
             | Event::KeyDown {
                 keycode: Keycode::Escape,
             } => {
                 text_input.stop();
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::Window { .. } => {
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::KeyDown { keycode, .. } => match keycode {
                 Keycode::Down => {
@@ -89,11 +89,11 @@ impl RandomItemEditorState {
                         set_value(&mut context.level, &game_type, self.selected, value - 1);
                     }
                 }
-                _ => (),
+                _ => return EventResult::EventIgnored,
             },
-            _ => {}
+            _ => return EventResult::EventIgnored,
         }
-        Mode::RandomItemEditor(game_type)
+        EventResult::KeepMode
     }
 
     pub fn render<R: Renderer>(

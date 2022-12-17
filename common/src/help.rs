@@ -2,6 +2,7 @@ use crate::context::Context;
 use crate::event::Event;
 use crate::render::Renderer;
 use crate::types::Mode;
+use crate::EventResult;
 
 const LINES: [&str; 19] = [
     "ESC - quit",
@@ -32,18 +33,19 @@ impl HelpState {
         HelpState
     }
 
-    pub fn handle_event(&self, event: Event) -> Mode {
+    pub fn handle_event(&self, event: Event) -> EventResult {
         match event {
-            Event::Quit => return Mode::Editor,
+            Event::Quit => return EventResult::ChangeMode(Mode::Editor),
             Event::KeyDown { .. } => {
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::Window { .. } => {
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
-            _ => {}
+            _ => {
+                return EventResult::EventIgnored;
+            }
         }
-        Mode::Help
     }
 
     pub fn render<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {

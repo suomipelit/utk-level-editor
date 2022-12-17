@@ -13,7 +13,7 @@ use common::graphics::Graphics;
 use common::level::Level;
 use common::load_level::LevelLister;
 use common::types::{TextureType, Trigonometry};
-use common::{State, TextInput};
+use common::{RunState, State, TextInput};
 use log::Level as LogLevel;
 
 #[wasm_bindgen]
@@ -116,28 +116,33 @@ impl LevelEditor {
         self.renderer.height()
     }
 
-    fn handle_event(&mut self, event: Event) {
-        self.state
+    fn handle_event(&mut self, event: Event) -> bool {
+        let run_state = self
+            .state
             .handle_event(&mut self.context, &self.text_input, event);
+        match run_state {
+            RunState::Run { needs_render } => needs_render,
+            RunState::Quit => false,
+        }
     }
 
-    pub fn mouse_move(&mut self, x: u32, y: u32) {
-        self.handle_event(Event::MouseMotion { x, y });
+    pub fn mouse_move(&mut self, x: u32, y: u32) -> bool {
+        self.handle_event(Event::MouseMotion { x, y })
     }
-    pub fn mouse_down(&mut self, button: MouseButton) {
+    pub fn mouse_down(&mut self, button: MouseButton) -> bool {
         self.handle_event(Event::MouseButtonDown {
             button: button.into(),
-        });
+        })
     }
-    pub fn mouse_up(&mut self, button: MouseButton) {
+    pub fn mouse_up(&mut self, button: MouseButton) -> bool {
         self.handle_event(Event::MouseButtonUp {
             button: button.into(),
-        });
+        })
     }
-    pub fn key_down(&mut self, key: Keycode) {
+    pub fn key_down(&mut self, key: Keycode) -> bool {
         self.handle_event(Event::KeyDown {
             keycode: key.into(),
-        });
+        })
     }
 
     pub fn frame(&mut self) {

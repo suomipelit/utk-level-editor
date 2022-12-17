@@ -3,6 +3,7 @@ use crate::event::{Event, Keycode};
 use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::{get_bottom_text_position, TITLE_POSITION};
+use crate::EventResult;
 
 pub trait LevelLister {
     fn refresh(&mut self);
@@ -29,14 +30,18 @@ impl<L: LevelLister> LoadLevelState<L> {
         self.selected = 0;
     }
 
-    pub fn handle_event<T: Texture>(&mut self, context: &mut Context<T>, event: Event) -> Mode {
+    pub fn handle_event<T: Texture>(
+        &mut self,
+        context: &mut Context<T>,
+        event: Event,
+    ) -> EventResult {
         match event {
             Event::Quit { .. }
             | Event::KeyDown {
                 keycode: Keycode::Escape,
-            } => return Mode::Editor,
+            } => return EventResult::ChangeMode(Mode::Editor),
             Event::Window { .. } => {
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::KeyDown { keycode, .. } => match keycode {
                 Keycode::Down => {
@@ -58,13 +63,13 @@ impl<L: LevelLister> LoadLevelState<L> {
                         context.level_save_name =
                             level_name.strip_suffix(".LEV").unwrap().to_string();
                     }
-                    return Mode::Editor;
+                    return EventResult::ChangeMode(Mode::Editor);
                 }
-                _ => {}
+                _ => return EventResult::EventIgnored,
             },
-            _ => {}
+            _ => return EventResult::EventIgnored,
         }
-        Mode::LoadLevel
+        EventResult::KeepMode
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {

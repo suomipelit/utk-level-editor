@@ -3,7 +3,7 @@ use crate::event::{Event, Keycode};
 use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::get_bottom_text_position;
-use crate::TextInput;
+use crate::{EventResult, TextInput};
 
 enum Value {
     Comment,
@@ -97,17 +97,17 @@ impl GeneralLevelInfoState {
         context: &mut Context<T>,
         text_input: &I,
         event: Event,
-    ) -> Mode {
+    ) -> EventResult {
         match event {
             Event::Quit { .. }
             | Event::KeyDown {
                 keycode: Keycode::Escape,
             } => {
                 text_input.stop();
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::Window { .. } => {
-                return Mode::Editor;
+                return EventResult::ChangeMode(Mode::Editor);
             }
             Event::TextInput { text, .. } => {
                 if let Value::Comment = self.options[self.selected].value {
@@ -130,7 +130,7 @@ impl GeneralLevelInfoState {
                 Keycode::Right => match self.options[self.selected].value {
                     Value::Number(index) => context.level.general_info.enemy_table[index] += 1,
                     Value::TimeLimit => context.level.general_info.time_limit += 10,
-                    _ => (),
+                    _ => return EventResult::EventIgnored,
                 },
                 Keycode::Left => match self.options[self.selected].value {
                     Value::Number(index) => {
@@ -145,18 +145,18 @@ impl GeneralLevelInfoState {
                             *value -= 10;
                         }
                     }
-                    _ => (),
+                    _ => return EventResult::EventIgnored,
                 },
                 Keycode::Backspace => {
                     if let Value::Comment = self.options[self.selected].value {
                         context.level.general_info.comment.pop();
                     }
                 }
-                _ => (),
+                _ => return EventResult::EventIgnored,
             },
-            _ => {}
+            _ => return EventResult::EventIgnored,
         }
-        Mode::GeneralLevelInfo
+        EventResult::KeepMode
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {

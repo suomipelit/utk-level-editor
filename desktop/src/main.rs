@@ -18,7 +18,7 @@ use common::level::Level;
 use common::load_level::LevelLister;
 use common::render::Renderer;
 use common::types::{TextureType, Trigonometry};
-use common::{RunState, State, TextInput};
+use common::{EventResult, RunState, State, TextInput};
 
 struct SdlTextInput(TextInputUtil);
 
@@ -81,19 +81,20 @@ pub fn main() {
     let level_lister = DirectoryLevelLister::new();
     let mut state: State<DirectoryLevelLister, FileLevelWriter> = State::new(level_lister);
     loop {
-        for sdl_event in event_pump.poll_iter() {
-            if let Some(event) = convert_event(sdl_event) {
-                if let Event::Window { win_event } = event {
-                    resize(&mut renderer, &mut context, win_event);
+        let sdl_event = event_pump.wait_event();
+        if let Some(event) = convert_event(sdl_event) {
+            if let Event::Window { win_event } = event {
+                resize(&mut renderer, &mut context, win_event);
+            }
+            match state.handle_event(&mut context, &text_input, event) {
+                RunState::Quit => return,
+                RunState::Run { needs_render: true } => {
+                    state.render(&mut renderer, &context);
+                    renderer.present();
                 }
-                match state.handle_event(&mut context, &text_input, event) {
-                    RunState::Quit => return,
-                    RunState::Run => {}
-                }
+                _ => {}
             }
         }
-        state.render(&mut renderer, &context);
-        renderer.present();
         std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }

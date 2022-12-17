@@ -11,7 +11,7 @@ use crate::render::{highlight_selected_tile, Point, Rect, Renderer, RendererColo
 use crate::types::GameType;
 use crate::types::{Mode, TextureType};
 use crate::util::*;
-use crate::TextInput;
+use crate::{EventResult, TextInput};
 
 #[derive(PartialEq)]
 enum NewLevelState {
@@ -95,7 +95,7 @@ impl<W: LevelWriter> EditorState<W> {
         context: &mut Context<T>,
         text_input: &I,
         event: Event,
-    ) -> Mode {
+    ) -> EventResult {
         match event {
             Event::Quit
             | Event::KeyDown {
@@ -126,15 +126,15 @@ impl<W: LevelWriter> EditorState<W> {
                 PromptType::Save(SaveLevelType::NameInput) => {
                     sanitize_level_name_input(&text, &mut context.level_save_name)
                 }
-                _ => {}
+                _ => return EventResult::EventIgnored,
             },
-            Event::Window { .. } => {}
+            Event::Window { .. } => return EventResult::EventIgnored,
             Event::KeyDown { keycode, .. } => match keycode {
                 Keycode::Space => {
-                    return Mode::TileSelect;
+                    return EventResult::ChangeMode(Mode::TileSelect);
                 }
                 Keycode::F1 => {
-                    return Mode::Help;
+                    return EventResult::ChangeMode(Mode::Help);
                 }
                 Keycode::F2 => {
                     text_input.stop();
@@ -142,7 +142,7 @@ impl<W: LevelWriter> EditorState<W> {
                 }
                 Keycode::F3 => {
                     text_input.stop();
-                    return Mode::LoadLevel;
+                    return EventResult::ChangeMode(Mode::LoadLevel);
                 }
                 Keycode::F4 => {
                     self.prompt = PromptType::NewLevel(NewLevelState::Prompt);
@@ -158,23 +158,25 @@ impl<W: LevelWriter> EditorState<W> {
                     });
                 }
                 Keycode::F7 => {
-                    return Mode::GeneralLevelInfo;
+                    return EventResult::ChangeMode(Mode::GeneralLevelInfo);
                 }
                 Keycode::F8 => {
-                    return Mode::RandomItemEditor(GameType::Normal);
+                    return EventResult::ChangeMode(Mode::RandomItemEditor(GameType::Normal));
                 }
                 Keycode::F9 => {
-                    return Mode::RandomItemEditor(GameType::Deathmatch);
+                    return EventResult::ChangeMode(Mode::RandomItemEditor(GameType::Deathmatch));
                 }
                 Keycode::Num1 | Keycode::Num2 => match self.prompt {
-                    PromptType::NewLevel(_) | PromptType::Save(_) => {}
+                    PromptType::NewLevel(_) | PromptType::Save(_) => {
+                        return EventResult::EventIgnored
+                    }
                     _ => {
                         self.set_position = if keycode == Keycode::Num1 { 1 } else { 2 };
                         self.prompt = PromptType::None;
                     }
                 },
                 Keycode::Q | Keycode::W => match self.prompt {
-                    PromptType::Save(_) => {}
+                    PromptType::Save(_) => return EventResult::EventIgnored,
                     _ => {
                         self.insert_item = if keycode == Keycode::Q {
                             InsertType::Spotlight(InsertState::Place)
@@ -186,7 +188,7 @@ impl<W: LevelWriter> EditorState<W> {
                     }
                 },
                 Keycode::A | Keycode::S => match self.prompt {
-                    PromptType::Save(_) => {}
+                    PromptType::Save(_) => return EventResult::EventIgnored,
                     _ => {
                         self.insert_item = if keycode == Keycode::A {
                             InsertType::Steam(InsertState::Place)
@@ -198,7 +200,7 @@ impl<W: LevelWriter> EditorState<W> {
                     }
                 },
                 Keycode::Z | Keycode::X | Keycode::C => match self.prompt {
-                    PromptType::Save(_) => {}
+                    PromptType::Save(_) => return EventResult::EventIgnored,
                     _ => {
                         self.insert_item = if keycode == Keycode::Z {
                             InsertType::NormalCrate(InsertState::Place)
@@ -230,11 +232,11 @@ impl<W: LevelWriter> EditorState<W> {
                         };
                         self.prompt = PromptType::None;
                     }
-                    PromptType::Quit => return Mode::Quit,
+                    PromptType::Quit => return EventResult::Quit,
                     PromptType::None => {
                         self.prompt = PromptType::None;
                     }
-                    _ => {}
+                    _ => return EventResult::EventIgnored,
                 },
                 Keycode::Up => match &self.insert_item {
                     InsertType::Spotlight(state) => {
@@ -425,7 +427,7 @@ impl<W: LevelWriter> EditorState<W> {
                             context.saved_level_name = Some(level_saved_name.to_lowercase());
                             self.prompt = PromptType::None;
                         }
-                        _ => {}
+                        _ => return EventResult::EventIgnored,
                     },
                 },
                 Keycode::Backspace => match &self.prompt {
@@ -436,12 +438,12 @@ impl<W: LevelWriter> EditorState<W> {
                         NewLevelState::YSize => {
                             self.new_level_size_y.pop();
                         }
-                        _ => {}
+                        _ => return EventResult::EventIgnored,
                     },
                     PromptType::Save(SaveLevelType::NameInput) => {
                         context.level_save_name.pop();
                     }
-                    _ => {}
+                    _ => return EventResult::EventIgnored,
                 },
                 Keycode::Plus | Keycode::KpPlus => {
                     if context.graphics.render_multiplier == 1 {
@@ -530,7 +532,7 @@ impl<W: LevelWriter> EditorState<W> {
                 self.mouse_right_click = false;
             }
         };
-        Mode::Editor
+        EventResult::KeepMode
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {

@@ -31,7 +31,14 @@ pub trait TextInput {
 }
 
 pub enum RunState {
-    Run,
+    Run { needs_render: bool },
+    Quit,
+}
+
+pub enum EventResult {
+    KeepMode,
+    ChangeMode(Mode),
+    EventIgnored,
     Quit,
 }
 
@@ -65,7 +72,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
         event: Event,
     ) -> RunState {
         let prev_mode = self.mode;
-        self.mode = match self.mode {
+        let event_result = match self.mode {
             Mode::Editor => self.editor.handle_event(context, text_input, event),
             Mode::TileSelect => self.tile_select.handle_event(context, event),
             Mode::Help => self.help.handle_event(event),
@@ -76,14 +83,20 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
                 .random_item_editor
                 .handle_event(context, text_input, game_mode, event),
             Mode::LoadLevel => self.load_level.handle_event(context, event),
-            Mode::Quit => Mode::Quit,
         };
-        if self.mode != prev_mode && self.mode == Mode::LoadLevel {
-            self.load_level.enter()
-        }
-        match self.mode {
-            Mode::Quit => RunState::Quit,
-            _ => RunState::Run,
+        match event_result {
+            EventResult::ChangeMode(mode) => {
+                self.mode = mode;
+                if self.mode != prev_mode && self.mode == Mode::LoadLevel {
+                    self.load_level.enter();
+                }
+                RunState::Run { needs_render: true }
+            }
+            EventResult::KeepMode => RunState::Run { needs_render: true },
+            EventResult::EventIgnored => RunState::Run {
+                needs_render: false,
+            },
+            EventResult::Quit => RunState::Quit,
         }
     }
 
@@ -97,7 +110,6 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
                 self.random_item_editor.render(renderer, context, game_type)
             }
             Mode::LoadLevel => self.load_level.render(renderer, context),
-            Mode::Quit => {}
         };
     }
 }
