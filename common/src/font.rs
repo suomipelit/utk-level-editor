@@ -13,7 +13,7 @@ struct Glyph<T> {
 }
 
 pub struct Font<T> {
-    pub text_size_multiplier: u32,
+    text_size_multiplier: u32,
     glyphs: Vec<Glyph<T>>,
     line_height: u32,
 }
@@ -86,6 +86,10 @@ impl<T> Font<T> {
 
     pub fn line_height(&self) -> u32 {
         self.line_height * self.text_size_multiplier
+    }
+
+    pub fn px(&self, value: u32) -> u32 {
+        value * self.text_size_multiplier
     }
 
     pub fn render_text_relative<R: Renderer<Texture = T>>(

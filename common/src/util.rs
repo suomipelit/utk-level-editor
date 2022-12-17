@@ -7,15 +7,12 @@ use crate::render::{Point, Texture};
 use crate::types::Trigonometry;
 
 pub fn get_title_position<T>(font: &Font<T>) -> (u32, u32) {
-    (
-        10 * font.text_size_multiplier,
-        5 * font.text_size_multiplier,
-    )
+    (font.px(10), font.px(5))
 }
 
 pub fn get_bottom_text_position<T>(font: &Font<T>, resolution_y: u32) -> (u32, u32) {
     let (x, _) = get_title_position(font);
-    (x, resolution_y - 13 * font.text_size_multiplier)
+    (x, resolution_y - font.px(13))
 }
 
 pub fn get_tile_coordinates(id: u32, width: u32) -> (u32, u32) {

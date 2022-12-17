@@ -165,11 +165,8 @@ impl GeneralLevelInfoState {
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
         renderer.clear_screen();
-        let mut option_position = (
-            20 * context.font.text_size_multiplier,
-            10 * context.font.text_size_multiplier,
-        );
-        let mut value_position = (150 * context.font.text_size_multiplier, option_position.1);
+        let mut option_position = (context.font.px(20), context.font.px(10));
+        let mut value_position = (context.font.px(150), option_position.1);
         for x in 0..self.options.len() {
             let option = &self.options[x];
             if self.selected == x {
@@ -177,8 +174,8 @@ impl GeneralLevelInfoState {
                     renderer,
                     "*",
                     (
-                        option_position.0 - 10 * context.font.text_size_multiplier,
-                        option_position.1 + context.font.text_size_multiplier,
+                        option_position.0 - context.font.px(10),
+                        option_position.1 + context.font.px(1),
                     ),
                 );
             }
@@ -190,7 +187,7 @@ impl GeneralLevelInfoState {
                 Some(text) => context.font.render_text(renderer, text, value_position),
                 None => (),
             };
-            option_position.1 += context.font.line_height() + 2 * context.font.text_size_multiplier;
+            option_position.1 += context.font.line_height() + context.font.px(2);
             value_position.1 = option_position.1;
         }
         context.font.render_text(

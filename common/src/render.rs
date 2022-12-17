@@ -47,6 +47,14 @@ impl From<(u8, u8, u8, u8)> for Color {
 }
 
 impl Color {
+    pub fn from_u32(c: u32) -> Self {
+        let r = (c & 0xff) as u8;
+        let g = ((c >> 8) & 0xff) as u8;
+        let b = ((c >> 16) & 0xff) as u8;
+        let a = ((c >> 24) & 0xff) as u8;
+        Self { r, g, b, a }
+    }
+
     pub fn to_u32(&self) -> u32 {
         let Color { r, g, b, a } = *self;
         (a as u32) << 24 | (b as u32) << 16 | (g as u32) << 8 | r as u32

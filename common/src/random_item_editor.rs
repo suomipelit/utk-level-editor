@@ -117,17 +117,17 @@ impl RandomItemEditorState {
             get_title_position(&context.font),
         );
 
-        let y = 25 * context.font.text_size_multiplier;
-        let mut option_position = (20 * context.font.text_size_multiplier, y);
-        let mut value_position = (140 * context.font.text_size_multiplier, option_position.1);
+        let y = context.font.px(25);
+        let mut option_position = (context.font.px(20), y);
+        let mut value_position = (context.font.px(140), option_position.1);
         for x in 0..ALL_CRATES.len() {
             if self.selected == x {
                 context.font.render_text(
                     renderer,
                     "*",
                     (
-                        option_position.0 - 10 * context.font.text_size_multiplier,
-                        option_position.1 + context.font.text_size_multiplier,
+                        option_position.0 - context.font.px(10),
+                        option_position.1 + context.font.px(1),
                     ),
                 );
             }
@@ -142,10 +142,10 @@ impl RandomItemEditorState {
             if x == 10 {
                 option_position.1 = y;
                 value_position.1 = option_position.1;
-                option_position.0 = 165 * context.font.text_size_multiplier;
-                value_position.0 = option_position.0 + 125 * context.font.text_size_multiplier;
+                option_position.0 = context.font.px(165);
+                value_position.0 = option_position.0 + context.font.px(125);
             } else {
-                option_position.1 += 10 * context.font.text_size_multiplier;
+                option_position.1 += context.font.px(10);
                 value_position.1 = option_position.1;
             }
         }
