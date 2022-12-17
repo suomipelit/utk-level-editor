@@ -21,7 +21,11 @@ impl TileSelectState {
         self.first_frame = true;
     }
 
-    pub fn handle_event<T: Texture>(&self, context: &mut Context<T>, event: Event) -> EventResult {
+    pub fn handle_event<T: Texture>(
+        &mut self,
+        context: &mut Context<T>,
+        event: Event,
+    ) -> EventResult {
         match event {
             Event::Quit
             | Event::KeyDown {
@@ -34,7 +38,7 @@ impl TileSelectState {
                 Keycode::Space => {
                     return EventResult::ChangeMode(Mode::Editor);
                 }
-                Keycode::PageDown => {
+                Keycode::PageDown | Keycode::Down => {
                     context.texture_type_scrolled =
                         if context.texture_type_scrolled == TextureType::Floor {
                             TextureType::Walls
@@ -42,9 +46,10 @@ impl TileSelectState {
                             TextureType::Shadow
                         } else {
                             TextureType::Floor
-                        }
+                        };
+                    self.first_frame = true;
                 }
-                Keycode::PageUp => {
+                Keycode::PageUp | Keycode::Up => {
                     context.texture_type_scrolled =
                         if context.texture_type_scrolled == TextureType::Floor {
                             TextureType::Shadow
@@ -52,7 +57,8 @@ impl TileSelectState {
                             TextureType::Walls
                         } else {
                             TextureType::Floor
-                        }
+                        };
+                    self.first_frame = true;
                 }
                 _ => return EventResult::EventIgnored,
             },
