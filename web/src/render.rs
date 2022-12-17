@@ -212,7 +212,7 @@ impl Renderer for CanvasRenderer {
                 } else if alpha == 0xff000000 {
                     self.screen[di] = texture.pixels[si];
                 } else {
-                    // Alpha blending not implemented (or needed)
+                    self.screen[di] = blend(self.screen[di], texture.pixels[si]);
                 }
             }
         }
@@ -230,4 +230,13 @@ impl Renderer for CanvasRenderer {
     fn window_size(&self) -> (u32, u32) {
         (self.width, self.height)
     }
+}
+
+fn blend(dst: u32, src: u32) -> u32 {
+    let alpha = ((src >> 24) & 0xff) as f32 / 255.0;
+    let inv_alpha = 1.0 - alpha;
+    let r = ((src & 0xff) as f32 * alpha + (dst & 0xff) as f32 * inv_alpha) as u8;
+    let g = (((src >> 8) & 0xff) as f32 * alpha + ((dst >> 8) & 0xff) as f32 * inv_alpha) as u8;
+    let b = (((src >> 16) & 0xff) as f32 * alpha + ((dst >> 16) & 0xff) as f32 * inv_alpha) as u8;
+    255 << 24 | (b as u32) << 16 | (g as u32) << 8 | r as u32
 }
