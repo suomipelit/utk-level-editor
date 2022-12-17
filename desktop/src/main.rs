@@ -5,7 +5,6 @@ use sdl2::keyboard::TextInputUtil;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::time::Duration;
 
 use crate::render::{SdlRenderer, SdlTexture};
 use common::context::{Context, Textures};
@@ -18,7 +17,7 @@ use common::level::Level;
 use common::load_level::LevelLister;
 use common::render::Renderer;
 use common::types::{TextureType, Trigonometry};
-use common::{EventResult, RunState, State, TextInput};
+use common::{RunState, State, TextInput};
 
 struct SdlTextInput(TextInputUtil);
 
@@ -89,13 +88,13 @@ pub fn main() {
             match state.handle_event(&mut context, &text_input, event) {
                 RunState::Quit => return,
                 RunState::Run { needs_render: true } => {
+                    renderer.clear_screen_before_render();
                     state.render(&mut renderer, &context);
                     renderer.present();
                 }
                 _ => {}
             }
         }
-        std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
 

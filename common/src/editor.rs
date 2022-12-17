@@ -536,7 +536,6 @@ impl<W: LevelWriter> EditorState<W> {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
-        renderer.clear_screen_if_needed();
         self.render_level(renderer, context);
 
         let highlighted_id = get_tile_id_from_coordinates(

@@ -8,11 +8,17 @@ use crate::types::*;
 use crate::util::*;
 use crate::EventResult;
 
-pub struct TileSelectState;
+pub struct TileSelectState {
+    first_frame: bool,
+}
 
 impl TileSelectState {
     pub fn new() -> Self {
-        TileSelectState
+        TileSelectState { first_frame: true }
+    }
+
+    pub fn enter(&mut self) {
+        self.first_frame = true;
     }
 
     pub fn handle_event<T: Texture>(&self, context: &mut Context<T>, event: Event) -> EventResult {
@@ -82,8 +88,11 @@ impl TileSelectState {
         EventResult::KeepMode
     }
 
-    pub fn render<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
-        renderer.clear_screen();
+    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
+        if self.first_frame {
+            renderer.clear_screen();
+            self.first_frame = false;
+        }
         let texture_selected = match context.texture_type_scrolled {
             TextureType::Floor => &context.textures.floor,
             TextureType::Walls => &context.textures.walls,

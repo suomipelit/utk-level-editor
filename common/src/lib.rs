@@ -86,11 +86,19 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
         };
         match event_result {
             EventResult::ChangeMode(mode) => {
-                self.mode = mode;
-                if self.mode != prev_mode && self.mode == Mode::LoadLevel {
-                    self.load_level.enter();
+                if mode != prev_mode {
+                    self.mode = mode;
+                    match self.mode {
+                        Mode::LoadLevel => self.load_level.enter(),
+                        Mode::TileSelect => self.tile_select.enter(),
+                        _ => {}
+                    };
+                    RunState::Run { needs_render: true }
+                } else {
+                    RunState::Run {
+                        needs_render: false,
+                    }
                 }
-                RunState::Run { needs_render: true }
             }
             EventResult::KeepMode => RunState::Run { needs_render: true },
             EventResult::EventIgnored => RunState::Run {

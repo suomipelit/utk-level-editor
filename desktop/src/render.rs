@@ -56,6 +56,12 @@ impl<'a> SdlRenderer<'a> {
         }
     }
 
+    pub fn clear_screen_before_render(&mut self) {
+        self.canvas
+            .set_draw_color(to_sdl_color(&RendererColor::Black));
+        self.canvas.clear();
+    }
+
     pub fn present(&mut self) {
         self.canvas.present();
     }
@@ -88,13 +94,7 @@ impl<'a> Renderer for SdlRenderer<'a> {
     }
 
     fn clear_screen(&mut self) {
-        self.canvas
-            .set_draw_color(to_sdl_color(&RendererColor::Black));
-        self.canvas.clear();
-    }
-
-    fn clear_screen_if_needed(&mut self) {
-        self.clear_screen();
+        // Nothing to do here: clear_screen_before_render() is used before every frame.
     }
 
     fn draw_rect(&mut self, rect: &Rect, color: &RendererColor) {
