@@ -633,7 +633,7 @@ impl<W: LevelWriter> EditorState<W> {
             }
         }
         if let Some(text) = &context.saved_level_name {
-            let (x, y) = get_bottom_text_position(context.graphics.resolution_y);
+            let (x, y) = get_bottom_text_position(&context.font, context.graphics.resolution_y);
             context.font.render_text(renderer, text, (x, y));
         }
     }

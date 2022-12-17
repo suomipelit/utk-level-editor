@@ -145,7 +145,7 @@ impl TileSelectState {
         context.font.render_text(
             renderer,
             active_text,
-            get_bottom_text_position(context.graphics.resolution_y),
+            get_bottom_text_position(&context.font, context.graphics.resolution_y),
         );
     }
 }

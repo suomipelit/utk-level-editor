@@ -4,7 +4,7 @@ use crate::level::Level;
 use crate::level::ALL_CRATES;
 use crate::render::{Renderer, Texture};
 use crate::types::*;
-use crate::util::{get_bottom_text_position, TITLE_POSITION};
+use crate::util::{get_bottom_text_position, get_title_position};
 use crate::{EventResult, TextInput};
 
 fn get_value(level: &Level, game_type: &GameType, index: usize) -> u32 {
@@ -110,18 +110,21 @@ impl RandomItemEditorState {
                 GameType::Normal => "NORMAL GAME CRATES",
                 GameType::Deathmatch => "DEATHMATCH CRATES",
             },
-            TITLE_POSITION,
+            get_title_position(&context.font),
         );
 
-        let y = 50;
-        let mut option_position = (40, y);
-        let mut value_position = (280, option_position.1);
+        let y = 25 * context.font.text_size_multiplier;
+        let mut option_position = (20 * context.font.text_size_multiplier, y);
+        let mut value_position = (140 * context.font.text_size_multiplier, option_position.1);
         for x in 0..ALL_CRATES.len() {
             if self.selected == x {
                 context.font.render_text(
                     renderer,
                     "*",
-                    (option_position.0 - 20, option_position.1 + 3),
+                    (
+                        option_position.0 - 10 * context.font.text_size_multiplier,
+                        option_position.1 + context.font.text_size_multiplier,
+                    ),
                 );
             }
             context
@@ -135,17 +138,17 @@ impl RandomItemEditorState {
             if x == 10 {
                 option_position.1 = y;
                 value_position.1 = option_position.1;
-                option_position.0 = 330;
-                value_position.0 = option_position.0 + 250;
+                option_position.0 = 165 * context.font.text_size_multiplier;
+                value_position.0 = option_position.0 + 125 * context.font.text_size_multiplier;
             } else {
-                option_position.1 += 20;
+                option_position.1 += 10 * context.font.text_size_multiplier;
                 value_position.1 = option_position.1;
             }
         }
         context.font.render_text(
             renderer,
             "press ESC to exit",
-            get_bottom_text_position(context.graphics.resolution_y),
+            get_bottom_text_position(&context.font, context.graphics.resolution_y),
         );
     }
 }

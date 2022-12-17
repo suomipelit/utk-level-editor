@@ -82,17 +82,22 @@ pub fn main() {
     loop {
         let sdl_event = event_pump.wait_event();
         if let Some(event) = convert_event(sdl_event) {
+            let mut render = false;
             if let Event::Window { win_event } = event {
                 resize(&mut renderer, &mut context, win_event);
+                render = true
             }
             match state.handle_event(&mut context, &text_input, event) {
                 RunState::Quit => return,
                 RunState::Run { needs_render: true } => {
-                    renderer.clear_screen_before_render();
-                    state.render(&mut renderer, &context);
-                    renderer.present();
+                    render = true;
                 }
                 _ => {}
+            }
+            if render {
+                renderer.clear_screen_before_render();
+                state.render(&mut renderer, &context);
+                renderer.present();
             }
         }
     }

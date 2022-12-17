@@ -1,3 +1,4 @@
+use crate::font::Font;
 use std::cmp;
 
 use crate::graphics::Graphics;
@@ -5,10 +6,16 @@ use crate::level::TILE_SIZE;
 use crate::render::{Point, Texture};
 use crate::types::Trigonometry;
 
-pub const TITLE_POSITION: (u32, u32) = (20, 10);
+pub fn get_title_position<T>(font: &Font<T>) -> (u32, u32) {
+    (
+        10 * font.text_size_multiplier,
+        5 * font.text_size_multiplier,
+    )
+}
 
-pub fn get_bottom_text_position(resolution_y: u32) -> (u32, u32) {
-    (TITLE_POSITION.0, resolution_y - 26)
+pub fn get_bottom_text_position<T>(font: &Font<T>, resolution_y: u32) -> (u32, u32) {
+    let (x, _) = get_title_position(font);
+    (x, resolution_y - 13 * font.text_size_multiplier)
 }
 
 pub fn get_tile_coordinates(id: u32, width: u32) -> (u32, u32) {

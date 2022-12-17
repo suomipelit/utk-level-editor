@@ -35,16 +35,10 @@ impl HelpState {
 
     pub fn handle_event(&self, event: Event) -> EventResult {
         match event {
-            Event::Quit => return EventResult::ChangeMode(Mode::Editor),
-            Event::KeyDown { .. } => {
-                return EventResult::ChangeMode(Mode::Editor);
-            }
-            Event::Window { .. } => {
-                return EventResult::ChangeMode(Mode::Editor);
-            }
-            _ => {
-                return EventResult::EventIgnored;
-            }
+            Event::Quit => EventResult::ChangeMode(Mode::Editor),
+            Event::KeyDown { .. } => EventResult::ChangeMode(Mode::Editor),
+            Event::Window { .. } => EventResult::ChangeMode(Mode::Editor),
+            _ => EventResult::EventIgnored,
         }
     }
 
@@ -54,7 +48,7 @@ impl HelpState {
         let mut position = 6;
         for line_text in &LINES {
             font.render_text(renderer, line_text, (10, position));
-            position += font.line_height + 2;
+            position += font.line_height() + 2;
         }
     }
 }

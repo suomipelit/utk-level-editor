@@ -2,7 +2,7 @@ use crate::context::Context;
 use crate::event::{Event, Keycode};
 use crate::render::{Renderer, Texture};
 use crate::types::*;
-use crate::util::{get_bottom_text_position, TITLE_POSITION};
+use crate::util::{get_bottom_text_position, get_title_position};
 use crate::EventResult;
 
 pub trait LevelLister {
@@ -77,7 +77,7 @@ impl<L: LevelLister> LoadLevelState<L> {
         let text_position = (40, 60);
         context
             .font
-            .render_text(renderer, "LOAD LEVEL:", TITLE_POSITION);
+            .render_text(renderer, "LOAD LEVEL:", get_title_position(&context.font));
         let line_spacing = 20;
         for x in 0..self.level_lister.len() {
             if self.selected == x {
@@ -99,7 +99,7 @@ impl<L: LevelLister> LoadLevelState<L> {
         context.font.render_text(
             renderer,
             "ENTER to select or ESC to exit",
-            get_bottom_text_position(context.graphics.resolution_y),
+            get_bottom_text_position(&context.font, context.graphics.resolution_y),
         );
     }
 }
