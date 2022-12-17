@@ -88,8 +88,12 @@ impl GeneralLevelInfoState {
         ];
         GeneralLevelInfoState {
             options,
-            selected: 0usize,
+            selected: 0,
         }
+    }
+
+    pub fn enter(&mut self) {
+        self.selected = 0;
     }
 
     pub fn handle_event<T: Texture, I: TextInput>(

@@ -91,6 +91,8 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
                     match self.mode {
                         Mode::LoadLevel => self.load_level.enter(),
                         Mode::TileSelect => self.tile_select.enter(),
+                        Mode::GeneralLevelInfo => self.general_level_info.enter(),
+                        Mode::RandomItemEditor(..) => self.random_item_editor.enter(),
                         _ => {}
                     };
                     RunState::Run { needs_render: true }

@@ -50,6 +50,10 @@ impl RandomItemEditorState {
         RandomItemEditorState { selected: 0 }
     }
 
+    pub fn enter(&mut self) {
+        self.selected = 0;
+    }
+
     pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
         context: &mut Context<T>,
