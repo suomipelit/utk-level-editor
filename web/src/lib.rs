@@ -287,10 +287,15 @@ impl LevelLister for WebLevelLister {
     }
 }
 
+#[wasm_bindgen(module = "/src/js/file.js")]
+extern "C" {
+    fn write_file(name: &str, data: &[u8]);
+}
+
 struct WebLevelWriter;
 
 impl LevelWriter for WebLevelWriter {
-    fn write(level: &Level, filename: &str) {
-        todo!()
+    fn write(filename: &str, level_data: &[u8]) {
+        write_file(filename, level_data);
     }
 }

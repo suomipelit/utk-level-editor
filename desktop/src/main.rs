@@ -271,9 +271,8 @@ impl LevelLister for DirectoryLevelLister {
 struct FileLevelWriter;
 
 impl LevelWriter for FileLevelWriter {
-    fn write(level: &Level, filename: &str) {
-        let level_data = level.serialize();
+    fn write(filename: &str, level_data: &[u8]) {
         let mut file = File::create(filename).unwrap();
-        file.write_all(&level_data).unwrap();
+        file.write_all(level_data).unwrap();
     }
 }

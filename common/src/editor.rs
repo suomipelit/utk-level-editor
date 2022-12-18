@@ -58,7 +58,7 @@ enum InsertType {
 }
 
 pub trait LevelWriter {
-    fn write(level: &Level, filename: &str);
+    fn write(filename: &str, level_data: &[u8]);
 }
 
 pub struct EditorState<W: LevelWriter> {
@@ -422,7 +422,8 @@ impl<W: LevelWriter> EditorState<W> {
                         {
                             let level_save_name_uppercase = context.level_save_name.to_uppercase();
                             let level_saved_name = format!("{}.LEV", &level_save_name_uppercase);
-                            W::write(&context.level, &level_saved_name);
+                            let level_data = context.level.serialize();
+                            W::write(&level_saved_name, &level_data);
                             text_input.stop();
                             context.saved_level_name = Some(level_saved_name.to_lowercase());
                             self.prompt = PromptType::None;
