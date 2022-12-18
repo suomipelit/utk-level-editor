@@ -57,7 +57,7 @@ impl RandomItemEditorState {
     pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
         context: &mut Context<T>,
-        text_input: &I,
+        text_input: &mut I,
         game_type: GameType,
         event: Event,
     ) -> EventResult {

@@ -95,7 +95,7 @@ impl LevelEditor {
             trigonometry: Trigonometry::new(),
             automatic_shadows: true,
         };
-        let text_input = WebTextInput;
+        let text_input = WebTextInput { enabled: false };
         let level_lister = WebLevelLister;
         let state: State<WebLevelLister, WebLevelWriter> = State::new(level_lister);
         Self {
@@ -119,7 +119,7 @@ impl LevelEditor {
     fn handle_event(&mut self, event: Event) -> bool {
         let run_state = self
             .state
-            .handle_event(&mut self.context, &self.text_input, event);
+            .handle_event(&mut self.context, &mut self.text_input, event);
         match run_state {
             RunState::Run { needs_render } => needs_render,
             RunState::Quit => false,
@@ -139,10 +139,19 @@ impl LevelEditor {
             button: button.into(),
         })
     }
-    pub fn key_down(&mut self, key: Keycode) -> bool {
-        self.handle_event(Event::KeyDown {
-            keycode: key.into(),
-        })
+    pub fn key_down(&mut self, key: Option<Keycode>, text: Option<String>) -> bool {
+        if self.text_input.enabled {
+            if let Some(text) = text {
+                return self.handle_event(Event::TextInput { text });
+            }
+        }
+        if let Some(key) = key {
+            self.handle_event(Event::KeyDown {
+                keycode: key.into(),
+            })
+        } else {
+            false
+        }
     }
 
     pub fn frame(&mut self) {
@@ -244,14 +253,18 @@ impl From<Keycode> for common::event::Keycode {
     }
 }
 
-struct WebTextInput;
+struct WebTextInput {
+    enabled: bool,
+}
 
 impl TextInput for WebTextInput {
-    fn start(&self) {
-        todo!()
+    fn start(&mut self) {
+        self.enabled = true;
     }
 
-    fn stop(&self) {}
+    fn stop(&mut self) {
+        self.enabled = false;
+    }
 }
 
 struct WebLevelLister;

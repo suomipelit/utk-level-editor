@@ -33,11 +33,17 @@ export async function run() {
   // Render the initial frame
   renderFrame()
 
+  const textKeys = new Set(
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
+  )
+
   document.addEventListener("keydown", (event) => {
     const keycode = toKeycode(event.key)
-    if (keycode !== undefined) {
+    const text =
+      event.key.length === 1 && textKeys.has(event.key) ? event.key : undefined
+    if (keycode !== undefined || text !== undefined) {
       event.preventDefault()
-      const needsRender = state.key_down(keycode)
+      const needsRender = state.key_down(keycode, text)
       if (needsRender) renderFrame()
     }
   })

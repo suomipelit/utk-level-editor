@@ -22,11 +22,11 @@ use common::{RunState, State, TextInput};
 struct SdlTextInput(TextInputUtil);
 
 impl TextInput for SdlTextInput {
-    fn start(&self) {
+    fn start(&mut self) {
         self.0.start();
     }
 
-    fn stop(&self) {
+    fn stop(&mut self) {
         self.0.stop();
     }
 }
@@ -75,7 +75,7 @@ pub fn main() {
         trigonometry: Trigonometry::new(),
         automatic_shadows: true,
     };
-    let text_input = SdlTextInput(video_subsystem.text_input());
+    let mut text_input = SdlTextInput(video_subsystem.text_input());
 
     let level_lister = DirectoryLevelLister::new();
     let mut state: State<DirectoryLevelLister, FileLevelWriter> = State::new(level_lister);
@@ -87,7 +87,7 @@ pub fn main() {
                 resize(&mut renderer, &mut context, win_event);
                 render = true
             }
-            match state.handle_event(&mut context, &text_input, event) {
+            match state.handle_event(&mut context, &mut text_input, event) {
                 RunState::Quit => return,
                 RunState::Run { needs_render: true } => {
                     render = true;

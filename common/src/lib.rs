@@ -26,8 +26,8 @@ pub mod types;
 pub mod util;
 
 pub trait TextInput {
-    fn start(&self);
-    fn stop(&self);
+    fn start(&mut self);
+    fn stop(&mut self);
 }
 
 pub enum RunState {
@@ -68,7 +68,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
     pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
         context: &mut Context<T>,
-        text_input: &I,
+        text_input: &mut I,
         event: Event,
     ) -> RunState {
         let prev_mode = self.mode;
@@ -90,7 +90,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
                     self.mode = mode;
                     match self.mode {
                         Mode::LoadLevel => self.load_level.enter(),
-                        Mode::GeneralLevelInfo => self.general_level_info.enter(),
+                        Mode::GeneralLevelInfo => self.general_level_info.enter(text_input),
                         Mode::RandomItemEditor(..) => self.random_item_editor.enter(),
                         _ => {}
                     };

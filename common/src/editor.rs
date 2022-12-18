@@ -93,7 +93,7 @@ impl<W: LevelWriter> EditorState<W> {
     pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
         context: &mut Context<T>,
-        text_input: &I,
+        text_input: &mut I,
         event: Event,
     ) -> EventResult {
         match event {

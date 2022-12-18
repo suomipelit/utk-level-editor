@@ -92,14 +92,15 @@ impl GeneralLevelInfoState {
         }
     }
 
-    pub fn enter(&mut self) {
+    pub fn enter<I: TextInput>(&mut self, text_input: &mut I) {
         self.selected = 0;
+        self.enable_text_editing_if_needed(text_input);
     }
 
     pub fn handle_event<T: Texture, I: TextInput>(
         &mut self,
         context: &mut Context<T>,
-        text_input: &I,
+        text_input: &mut I,
         event: Event,
     ) -> EventResult {
         match event {
@@ -196,7 +197,7 @@ impl GeneralLevelInfoState {
         );
     }
 
-    fn enable_text_editing_if_needed<T: TextInput>(&self, text_input: &T) {
+    fn enable_text_editing_if_needed<I: TextInput>(&self, text_input: &mut I) {
         match self.options[self.selected].value {
             Value::Comment => text_input.start(),
             _ => text_input.stop(),
