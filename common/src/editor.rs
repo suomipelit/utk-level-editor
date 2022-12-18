@@ -765,8 +765,11 @@ impl<W: LevelWriter> EditorState<W> {
         context: &Context<R::Texture>,
     ) {
         if self.prompt != PromptType::None {
-            let prompt_position = (context.graphics.resolution_x / 2 - 100, 200);
-            let prompt_line_spacing = 30;
+            let prompt_position = (
+                context.graphics.resolution_x / 2 - context.font.px(50),
+                context.font.px(100),
+            );
+            let prompt_line_spacing = context.font.px(15);
             let prompt_texture = match &self.prompt {
                 PromptType::NewLevel(state) => {
                     match state {
