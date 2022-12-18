@@ -240,10 +240,12 @@ impl Renderer for CanvasRenderer {
 }
 
 fn blend(dst: u32, src: u32) -> u32 {
-    let alpha = ((src >> 24) & 0xff) as f32 / 255.0;
+    let dst = Color::from_u32(dst);
+    let src = Color::from_u32(src);
+    let alpha = src.a as f32 / 255.0;
     let inv_alpha = 1.0 - alpha;
-    let r = ((src & 0xff) as f32 * alpha + (dst & 0xff) as f32 * inv_alpha) as u8;
-    let g = (((src >> 8) & 0xff) as f32 * alpha + ((dst >> 8) & 0xff) as f32 * inv_alpha) as u8;
-    let b = (((src >> 16) & 0xff) as f32 * alpha + ((dst >> 16) & 0xff) as f32 * inv_alpha) as u8;
-    255 << 24 | (b as u32) << 16 | (g as u32) << 8 | r as u32
+    let r = (src.r as f32 * alpha + dst.r as f32 * inv_alpha) as u8;
+    let g = (src.g as f32 * alpha + dst.g as f32 * inv_alpha) as u8;
+    let b = (src.b as f32 * alpha + dst.b as f32 * inv_alpha) as u8;
+    Color::from((r, g, b, 255)).to_u32()
 }
