@@ -106,8 +106,6 @@ impl RandomItemEditorState {
         context: &Context<R::Texture>,
         game_type: GameType,
     ) {
-        renderer.clear_screen();
-
         context.font.render_text(
             renderer,
             match game_type {

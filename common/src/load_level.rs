@@ -73,7 +73,6 @@ impl<L: LevelLister> LoadLevelState<L> {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
-        renderer.clear_screen();
         let text_position = (40, 60);
         context
             .font

@@ -8,17 +8,11 @@ use crate::types::*;
 use crate::util::*;
 use crate::EventResult;
 
-pub struct TileSelectState {
-    first_frame: bool,
-}
+pub struct TileSelectState;
 
 impl TileSelectState {
     pub fn new() -> Self {
-        TileSelectState { first_frame: true }
-    }
-
-    pub fn enter(&mut self) {
-        self.first_frame = true;
+        TileSelectState
     }
 
     pub fn handle_event<T: Texture>(
@@ -47,7 +41,6 @@ impl TileSelectState {
                         } else {
                             TextureType::Floor
                         };
-                    self.first_frame = true;
                 }
                 Keycode::PageUp | Keycode::Up => {
                     context.texture_type_scrolled =
@@ -58,7 +51,6 @@ impl TileSelectState {
                         } else {
                             TextureType::Floor
                         };
-                    self.first_frame = true;
                 }
                 _ => return EventResult::EventIgnored,
             },
@@ -95,10 +87,6 @@ impl TileSelectState {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
-        if self.first_frame {
-            renderer.clear_screen();
-            self.first_frame = false;
-        }
         let texture_selected = match context.texture_type_scrolled {
             TextureType::Floor => &context.textures.floor,
             TextureType::Walls => &context.textures.walls,

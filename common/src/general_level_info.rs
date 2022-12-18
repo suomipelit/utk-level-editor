@@ -164,7 +164,6 @@ impl GeneralLevelInfoState {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
-        renderer.clear_screen();
         let mut option_position = (context.font.px(20), context.font.px(10));
         let mut value_position = (context.font.px(150), option_position.1);
         for x in 0..self.options.len() {

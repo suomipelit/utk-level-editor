@@ -90,7 +90,6 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
                     self.mode = mode;
                     match self.mode {
                         Mode::LoadLevel => self.load_level.enter(),
-                        Mode::TileSelect => self.tile_select.enter(),
                         Mode::GeneralLevelInfo => self.general_level_info.enter(),
                         Mode::RandomItemEditor(..) => self.random_item_editor.enter(),
                         _ => {}
@@ -111,6 +110,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
     }
 
     pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
+        renderer.clear_screen();
         match self.mode {
             Mode::Editor => self.editor.render(renderer, context),
             Mode::TileSelect => self.tile_select.render(renderer, context),

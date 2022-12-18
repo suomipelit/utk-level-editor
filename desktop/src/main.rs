@@ -95,7 +95,6 @@ pub fn main() {
                 _ => {}
             }
             if render {
-                renderer.clear_screen_before_render();
                 state.render(&mut renderer, &context);
                 renderer.present();
             }
