@@ -174,9 +174,10 @@ impl Renderer for CanvasRenderer {
                 (-y, -x),
                 (-y, x),
             ] {
-                let index =
-                    ((center.y as i32 + cy) * self.width as i32 + center.x as i32 + cx) as usize;
-                self.screen[index] = c;
+                let (dx, dy) = (center.x + cx, center.y + cy);
+                if (dx >= 0 && dx < self.width as i32) && (dy >= 0 && dy < self.height as i32) {
+                    self.screen[(dy * self.width as i32 + dx) as usize] = c;
+                }
             }
 
             if error <= 0 {
