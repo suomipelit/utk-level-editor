@@ -52,8 +52,6 @@ impl LevelEditor {
     ) -> Self {
         console_log::init_with_level(LogLevel::Debug).unwrap();
 
-        info!("Start");
-
         let width = 640u32;
         let height = 400u32;
 

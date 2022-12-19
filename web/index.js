@@ -132,6 +132,10 @@ function toKeycode(key) {
       return Keycode.Right
     case "ArrowDown":
       return Keycode.Down
+    case "PageUp":
+      return Keycode.PageUp
+    case "PageDown":
+      return Keycode.PageDown
     case "1":
       return Keycode.Num1
     case "2":
