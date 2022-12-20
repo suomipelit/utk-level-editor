@@ -1,0 +1,61 @@
+name: Build
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo fmt --all --check
+
+  build-desktop:
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: sudo apt-get install -y libsdl2-dev libsdl2-image-dev
+      - run: cargo build --release
+
+  build-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+      - run: sudo apt-get install -y binaryen
+      - run: cargo install wasm-bindgen-cli
+      - run: ./build.sh
+
+      - name: Checkout GH pages repo
+        if: github.ref == 'refs/heads/master'
+        uses: actions/checkout@v2
+        with:
+          repository: suomipelit/utk-level-editor-web
+          path: deploy
+          token: ${{secrets.DEPLOY_TOKEN}}
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/master'
+        run: |
+          cp -r dist/* ../deploy/
+          cd ../deploy
+          git config --global user.email "GitHub Actions"
+          git config --global user.name "actions@github.com"
+          git commit -am "Deploy commit ${{github.sha}} of ${{github.repository}}"
+          git push
