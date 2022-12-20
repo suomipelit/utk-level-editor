@@ -2,6 +2,7 @@ use crate::level::TILE_SIZE;
 
 pub struct Graphics {
     pub render_multiplier: u32,
+    pub supports_scaling: bool,
     pub resolution_x: u32,
     pub resolution_y: u32,
 }
@@ -10,6 +11,7 @@ impl Graphics {
     pub fn new(resolution: (u32, u32), render_multiplier: u32) -> Graphics {
         Graphics {
             render_multiplier,
+            supports_scaling: render_multiplier > 1,
             resolution_x: resolution.0,
             resolution_y: resolution.1,
         }

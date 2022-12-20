@@ -5,7 +5,7 @@ use crate::render::Renderer;
 use crate::types::Mode;
 use crate::EventResult;
 
-const LINES: [&str; 19] = [
+const LINES: [&str; 16] = [
     "ESC - quit",
     "F1   - this help",
     "F2   - save level",
@@ -22,10 +22,9 @@ const LINES: [&str; 19] = [
     "1/2  - place pl1/pl2 start",
     "SPACE - tile selection/editing mode",
     "ARROW KEYS - move viewport",
-    " ",
-    "- WINDOW -",
-    "+/- adjust rendering size",
 ];
+
+const WINDOW_LINES: [&str; 3] = [" ", "- WINDOW -", "+/- adjust rendering size"];
 
 pub struct HelpState;
 
@@ -53,6 +52,12 @@ impl HelpState {
         for line_text in &LINES {
             font.render_text(renderer, line_text, (10, position));
             position += font.line_height() + 2;
+        }
+        if context.graphics.supports_scaling {
+            for line_text in &WINDOW_LINES {
+                font.render_text(renderer, line_text, (10, position));
+                position += font.line_height() + 2;
+            }
         }
     }
 }

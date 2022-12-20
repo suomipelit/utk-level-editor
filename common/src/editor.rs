@@ -448,11 +448,17 @@ impl<W: LevelWriter> EditorState<W> {
                     _ => return EventResult::EventIgnored,
                 },
                 Keycode::Plus | Keycode::KpPlus => {
+                    if !context.graphics.supports_scaling {
+                        return EventResult::EventIgnored;
+                    }
                     if context.graphics.render_multiplier == 1 {
                         context.graphics.render_multiplier = 2;
                     }
                 }
                 Keycode::Minus | Keycode::KpMinus => {
+                    if !context.graphics.supports_scaling {
+                        return EventResult::EventIgnored;
+                    }
                     if context.graphics.render_multiplier == 2 {
                         context.graphics.render_multiplier = 1;
                         context.level.scroll = (0, 0);
