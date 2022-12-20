@@ -7,6 +7,7 @@ use crate::level::{bullet_crates, energy_crates, weapon_crates, Steam};
 use crate::level::{crates, StaticCrateType};
 use crate::level::{CrateClass, StaticCrate};
 use crate::level::{Level, TILE_SIZE};
+use crate::load_level::LevelLister;
 use crate::render::{highlight_selected_tile, Point, Rect, Renderer, RendererColor, Texture};
 use crate::types::GameType;
 use crate::types::{Mode, TextureType};
@@ -90,9 +91,9 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    pub fn handle_event<T: Texture, I: TextInput>(
+    pub fn handle_event<L: LevelLister, T: Texture, I: TextInput>(
         &mut self,
-        context: &mut Context<T>,
+        context: &mut Context<L, T>,
         text_input: &mut I,
         event: Event,
     ) -> EventResult {
@@ -532,11 +533,16 @@ impl<W: LevelWriter> EditorState<W> {
             } => {
                 self.mouse_right_click = false;
             }
+            _ => return EventResult::EventIgnored,
         };
         EventResult::KeepMode
     }
 
-    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
+    pub fn render<L: LevelLister, R: Renderer>(
+        &mut self,
+        renderer: &mut R,
+        context: &Context<L, R::Texture>,
+    ) {
         self.render_level(renderer, context);
 
         let highlighted_id = get_tile_id_from_coordinates(
@@ -639,7 +645,11 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_level<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
+    fn render_level<L: LevelLister, R: Renderer>(
+        &self,
+        renderer: &mut R,
+        context: &Context<L, R::Texture>,
+    ) {
         let level = &context.level;
         let graphics = &context.graphics;
         let textures = &context.textures;
@@ -729,10 +739,10 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_input_prompt<R: Renderer>(
+    fn render_input_prompt<L: LevelLister, R: Renderer>(
         &self,
         renderer: &mut R,
-        context: &Context<R::Texture>,
+        context: &Context<L, R::Texture>,
         prompt_position: (u32, u32),
         prompt_line_spacing: u32,
         instruction_text: &str,
@@ -760,10 +770,10 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn render_prompt_if_needed<R: Renderer>(
+    fn render_prompt_if_needed<L: LevelLister, R: Renderer>(
         &self,
         renderer: &mut R,
-        context: &Context<R::Texture>,
+        context: &Context<L, R::Texture>,
     ) {
         if self.prompt != PromptType::None {
             let prompt_position = (
@@ -837,7 +847,7 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn handle_mouse_left_down<T: Texture>(&mut self, context: &mut Context<T>) {
+    fn handle_mouse_left_down<L: LevelLister, T: Texture>(&mut self, context: &mut Context<L, T>) {
         if self.drag_tiles {
             return;
         }
@@ -924,7 +934,7 @@ impl<W: LevelWriter> EditorState<W> {
         }
     }
 
-    fn handle_mouse_right_down<T: Texture>(&self, context: &mut Context<T>) {
+    fn handle_mouse_right_down<L: LevelLister, T: Texture>(&self, context: &mut Context<L, T>) {
         let pointed_tile = get_tile_id_from_coordinates(
             &context.graphics,
             &get_limited_screen_level_size(

@@ -2,6 +2,7 @@ use crate::context::Context;
 use crate::event::{Event, Keycode};
 use crate::level::Level;
 use crate::level::ALL_CRATES;
+use crate::load_level::LevelLister;
 use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::{get_bottom_text_position, get_title_position};
@@ -54,9 +55,9 @@ impl RandomItemEditorState {
         self.selected = 0;
     }
 
-    pub fn handle_event<T: Texture, I: TextInput>(
+    pub fn handle_event<L: LevelLister, T: Texture, I: TextInput>(
         &mut self,
-        context: &mut Context<T>,
+        context: &mut Context<L, T>,
         text_input: &mut I,
         game_type: GameType,
         event: Event,
@@ -100,10 +101,10 @@ impl RandomItemEditorState {
         EventResult::KeepMode
     }
 
-    pub fn render<R: Renderer>(
+    pub fn render<L: LevelLister, R: Renderer>(
         &mut self,
         renderer: &mut R,
-        context: &Context<R::Texture>,
+        context: &Context<L, R::Texture>,
         game_type: GameType,
     ) {
         context.font.render_text(

@@ -42,18 +42,18 @@ pub enum EventResult {
     Quit,
 }
 
-pub struct State<L: LevelLister, W: LevelWriter> {
+pub struct State<W: LevelWriter> {
     mode: Mode,
     editor: EditorState<W>,
     tile_select: TileSelectState,
     help: HelpState,
     general_level_info: GeneralLevelInfoState,
     random_item_editor: RandomItemEditorState,
-    load_level: LoadLevelState<L>,
+    load_level: LoadLevelState,
 }
 
-impl<L: LevelLister, W: LevelWriter> State<L, W> {
-    pub fn new(level_lister: L) -> Self {
+impl<W: LevelWriter> State<W> {
+    pub fn new() -> Self {
         Self {
             mode: Mode::Editor,
             editor: EditorState::new(),
@@ -61,13 +61,13 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
             help: HelpState::new(),
             general_level_info: GeneralLevelInfoState::new(),
             random_item_editor: RandomItemEditorState::new(),
-            load_level: LoadLevelState::new(level_lister),
+            load_level: LoadLevelState::new(),
         }
     }
 
-    pub fn handle_event<T: Texture, I: TextInput>(
+    pub fn handle_event<L: LevelLister, T: Texture, I: TextInput>(
         &mut self,
-        context: &mut Context<T>,
+        context: &mut Context<L, T>,
         text_input: &mut I,
         event: Event,
     ) -> RunState {
@@ -89,7 +89,7 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
                 if mode != prev_mode {
                     self.mode = mode;
                     match self.mode {
-                        Mode::LoadLevel => self.load_level.enter(),
+                        Mode::LoadLevel => self.load_level.enter(context),
                         Mode::GeneralLevelInfo => self.general_level_info.enter(text_input),
                         Mode::RandomItemEditor(..) => self.random_item_editor.enter(),
                         _ => {}
@@ -109,7 +109,11 @@ impl<L: LevelLister, W: LevelWriter> State<L, W> {
         }
     }
 
-    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
+    pub fn render<L: LevelLister, R: Renderer>(
+        &mut self,
+        renderer: &mut R,
+        context: &Context<L, R::Texture>,
+    ) {
         renderer.clear_screen();
         match self.mode {
             Mode::Editor => self.editor.render(renderer, context),

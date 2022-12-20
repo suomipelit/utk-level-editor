@@ -1,6 +1,5 @@
 mod render;
 
-use log::info;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::render::{CanvasRenderer, CanvasTexture};
@@ -15,6 +14,7 @@ use common::load_level::LevelLister;
 use common::types::{TextureType, Trigonometry};
 use common::{RunState, State, TextInput};
 use log::Level as LogLevel;
+use wasm_bindgen::JsValue;
 
 #[wasm_bindgen]
 pub struct WebImage {
@@ -37,8 +37,8 @@ impl WebImage {
 #[wasm_bindgen]
 pub struct LevelEditor {
     renderer: CanvasRenderer,
-    state: State<WebLevelLister, WebLevelWriter>,
-    context: Context<CanvasTexture>,
+    state: State<WebLevelWriter>,
+    context: Context<WebLevelLister, CanvasTexture>,
     text_input: WebTextInput,
 }
 
@@ -49,6 +49,8 @@ impl LevelEditor {
         walls_texture: WebImage,
         shadows_alpha_texture: WebImage,
         font_data: &[u8],
+        show_file_upload: js_sys::Function,
+        hide_file_upload: js_sys::Function,
     ) -> Self {
         console_log::init_with_level(LogLevel::Debug).unwrap();
 
@@ -84,6 +86,7 @@ impl LevelEditor {
             font,
             textures,
             level: Level::get_default_level((32, 22)),
+            level_lister: WebLevelLister::new(show_file_upload, hide_file_upload),
             selected_tile_id: 0,
             texture_type_selected: TextureType::Floor,
             texture_type_scrolled: TextureType::Floor,
@@ -94,8 +97,7 @@ impl LevelEditor {
             automatic_shadows: true,
         };
         let text_input = WebTextInput { enabled: false };
-        let level_lister = WebLevelLister;
-        let state: State<WebLevelLister, WebLevelWriter> = State::new(level_lister);
+        let state: State<WebLevelWriter> = State::new();
         Self {
             renderer,
             state,
@@ -150,6 +152,9 @@ impl LevelEditor {
         } else {
             false
         }
+    }
+    pub fn add_level_file(&mut self, name: String, data: &[u8]) {
+        self.context.level_lister.add_file(name, data);
     }
 
     pub fn frame(&mut self) {
@@ -265,23 +270,45 @@ impl TextInput for WebTextInput {
     }
 }
 
-struct WebLevelLister;
+struct WebLevelLister {
+    show_file_upload: js_sys::Function,
+    hide_file_upload: js_sys::Function,
+    files: Vec<(String, Vec<u8>)>,
+}
+
+impl WebLevelLister {
+    fn new(show_file_upload: js_sys::Function, hide_file_upload: js_sys::Function) -> Self {
+        Self {
+            show_file_upload,
+            hide_file_upload,
+            files: Vec::new(),
+        }
+    }
+
+    fn add_file(&mut self, name: String, data: &[u8]) {
+        self.files.push((name, data.to_vec()));
+    }
+}
 
 impl LevelLister for WebLevelLister {
     fn refresh(&mut self) {
-        todo!()
+        self.show_file_upload.call0(&JsValue::NULL).unwrap();
+    }
+
+    fn reset(&mut self) {
+        self.hide_file_upload.call0(&JsValue::NULL).unwrap();
     }
 
     fn len(&self) -> usize {
-        todo!()
+        self.files.len()
     }
 
     fn level_name(&self, index: usize) -> &str {
-        todo!()
+        self.files[index].0.as_str()
     }
 
     fn load_level(&self, index: usize) -> Vec<u8> {
-        todo!()
+        self.files[index].1.clone()
     }
 }
 

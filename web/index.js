@@ -13,7 +13,22 @@ export async function run() {
     loadImage("SHADOWS_ALPHA.PNG"),
     loadFile("TETRIS.FN2"),
   ])
-  const state = LevelEditor.new(floor1, walls1, shadowsAlpha, tetrisFn2)
+
+  const fileUpload = initFileUpload("#file-upload", (files) => {
+    for (const [name, data] of files) {
+      state.add_level_file(name, data)
+    }
+    renderFrame()
+  })
+
+  const state = LevelEditor.new(
+    floor1,
+    walls1,
+    shadowsAlpha,
+    tetrisFn2,
+    fileUpload.show,
+    fileUpload.hide
+  )
 
   const canvas = document.getElementById("screen")
   canvas.width = state.screen_width()
@@ -72,6 +87,55 @@ export async function run() {
         : false
     if (needsRender) renderFrame()
   })
+}
+
+function initFileUpload(selector, onFiles) {
+  const fileUpload = document.querySelector(selector)
+  const fileUploadInput = fileUpload.querySelector("input")
+
+  const show = () => {
+    fileUpload.style.display = "block"
+  }
+  const hide = () => {
+    fileUpload.style.display = "none"
+  }
+  const highlight = () => {
+    fileUpload.style.backgroundColor = "rgba(255, 0, 0, 0.2)"
+  }
+  const unhighlight = () => {
+    fileUpload.style.backgroundColor = "transparent"
+  }
+
+  const handleFiles = async (files) => {
+    const result = []
+    for (const file of files) {
+      result.push([file.name, new Uint8Array(await file.arrayBuffer())])
+    }
+    onFiles(result)
+  }
+
+  fileUpload.addEventListener("click", () => {
+    fileUploadInput.click()
+  })
+  ;["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    fileUpload.addEventListener(eventName, (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+    })
+  })
+  ;["dragenter", "dragover"].forEach((eventName) =>
+    fileUpload.addEventListener(eventName, highlight)
+  )
+  fileUpload.addEventListener("dragleave", unhighlight)
+  fileUpload.addEventListener("drop", (e) => {
+    unhighlight()
+    void handleFiles(e.dataTransfer.files)
+  })
+  fileUploadInput.addEventListener("change", async (event) => {
+    void handleFiles(event.target.files)
+  })
+
+  return { show, hide }
 }
 
 function renderToCanvas(buffer, state, context) {

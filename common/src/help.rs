@@ -1,5 +1,6 @@
 use crate::context::Context;
 use crate::event::Event;
+use crate::load_level::LevelLister;
 use crate::render::Renderer;
 use crate::types::Mode;
 use crate::EventResult;
@@ -42,7 +43,11 @@ impl HelpState {
         }
     }
 
-    pub fn render<R: Renderer>(&self, renderer: &mut R, context: &Context<R::Texture>) {
+    pub fn render<L: LevelLister, R: Renderer>(
+        &self,
+        renderer: &mut R,
+        context: &Context<L, R::Texture>,
+    ) {
         let font = &context.font;
         let mut position = 6;
         for line_text in &LINES {

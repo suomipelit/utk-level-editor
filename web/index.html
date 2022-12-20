@@ -8,13 +8,29 @@
         background-color: #000;
         color: #fff;
     }
-    .outer {
+    #outer {
         display: flex;
         justify-content: center;
     }
-    .inner {
+    #inner {
+        position: relative;
         width: 100%;
         max-width: 1200px;
+    }
+    #file-upload {
+        display: none; /* set to "block" to show */
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 50px;
+        color: #f00;
+        background-color: transparent;
+        border: 1px solid #f00;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    #file-upload input {
+        display: none;
     }
     canvas {
         image-rendering: pixelated;
@@ -23,8 +39,12 @@
   </style>
 </head>
 <body>
-<div class="outer">
-  <div class="inner">
+<div id="outer">
+  <div id="inner">
+    <div id="file-upload">
+      <div>Drop files here, or click to select</div>
+      <input type="file" multiple>
+    </div>
     <canvas id="screen"></canvas>
   </div>
 </div>

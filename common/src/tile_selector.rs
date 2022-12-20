@@ -1,5 +1,6 @@
 use crate::context::Context;
 use crate::event::{Event, Keycode, MouseButton};
+use crate::load_level::LevelLister;
 use crate::render::{
     get_texture_rect, get_texture_render_size, highlight_selected_tile, Renderer, RendererColor,
     Texture,
@@ -15,9 +16,9 @@ impl TileSelectState {
         TileSelectState
     }
 
-    pub fn handle_event<T: Texture>(
+    pub fn handle_event<L: LevelLister, T: Texture>(
         &mut self,
-        context: &mut Context<T>,
+        context: &mut Context<L, T>,
         event: Event,
     ) -> EventResult {
         match event {
@@ -86,7 +87,11 @@ impl TileSelectState {
         EventResult::KeepMode
     }
 
-    pub fn render<R: Renderer>(&mut self, renderer: &mut R, context: &Context<R::Texture>) {
+    pub fn render<L: LevelLister, R: Renderer>(
+        &mut self,
+        renderer: &mut R,
+        context: &Context<L, R::Texture>,
+    ) {
         let texture_selected = match context.texture_type_scrolled {
             TextureType::Floor => &context.textures.floor,
             TextureType::Walls => &context.textures.walls,

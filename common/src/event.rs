@@ -6,6 +6,7 @@ pub enum Event {
     MouseButtonUp { button: MouseButton },
     MouseMotion { x: u32, y: u32 },
     TextInput { text: String },
+    FileUpload { name: String, data: Vec<u8> },
 }
 
 #[derive(Clone, Copy)]

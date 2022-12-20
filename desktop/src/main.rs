@@ -66,6 +66,7 @@ pub fn main() {
         font,
         textures,
         level: Level::get_default_level((32, 22)),
+        level_lister: DirectoryLevelLister::new(),
         selected_tile_id: 0,
         texture_type_selected: TextureType::Floor,
         texture_type_scrolled: TextureType::Floor,
@@ -77,8 +78,7 @@ pub fn main() {
     };
     let mut text_input = SdlTextInput(video_subsystem.text_input());
 
-    let level_lister = DirectoryLevelLister::new();
-    let mut state: State<DirectoryLevelLister, FileLevelWriter> = State::new(level_lister);
+    let mut state: State<FileLevelWriter> = State::new();
     loop {
         let sdl_event = event_pump.wait_event();
         if let Some(event) = convert_event(sdl_event) {
@@ -102,14 +102,22 @@ pub fn main() {
     }
 }
 
-fn refresh(renderer: &mut SdlRenderer, context: &mut Context<SdlTexture>, window_size: (u32, u32)) {
+fn refresh(
+    renderer: &mut SdlRenderer,
+    context: &mut Context<DirectoryLevelLister, SdlTexture>,
+    window_size: (u32, u32),
+) {
     context.graphics.resolution_x = window_size.0;
     context.graphics.resolution_y = window_size.1;
     context.font = Font::new(renderer, &context.fn2, 2);
     context.textures = get_textures(renderer);
 }
 
-pub fn resize(renderer: &mut SdlRenderer, context: &mut Context<SdlTexture>, event: WindowEvent) {
+fn resize(
+    renderer: &mut SdlRenderer,
+    context: &mut Context<DirectoryLevelLister, SdlTexture>,
+    event: WindowEvent,
+) {
     match event {
         WindowEvent::Resized { width, height } => {
             refresh(renderer, context, (width, height));
@@ -120,7 +128,7 @@ pub fn resize(renderer: &mut SdlRenderer, context: &mut Context<SdlTexture>, eve
     }
 }
 
-pub fn get_textures(renderer: &mut SdlRenderer) -> Textures<SdlTexture> {
+fn get_textures(renderer: &mut SdlRenderer) -> Textures<SdlTexture> {
     Textures {
         floor: renderer.load_texture("assets/FLOOR1.PNG"),
         walls: renderer.load_texture("assets/WALLS1.PNG"),
@@ -251,6 +259,8 @@ impl LevelLister for DirectoryLevelLister {
             })
             .collect();
     }
+
+    fn reset(&mut self) {}
 
     fn len(&self) -> usize {
         self.files.len()
