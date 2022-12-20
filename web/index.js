@@ -3,7 +3,7 @@ import init, {
   WebImage,
   Keycode,
   MouseButton,
-} from "./dist/index.js"
+} from "./utk-level-editor.js"
 
 export async function run() {
   const wasm = await init()
