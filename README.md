@@ -1,36 +1,29 @@
 # Level editor for Ultimate Tapan Kaikki (TK321)
 
-Pretty much feature complete level editor written in Rust for Ultimate Tapan Kaikki (TK321) DOS game classic. See also [opensourced game itself](https://github.com/suomipelit/ultimatetapankaikki).
+A feature complete level editor written in Rust for Ultimate Tapan Kaikki (TK321) DOS game classic. See also the [opensourced game itself](https://github.com/suomipelit/ultimatetapankaikki).
 
-Editor is heavily based on original DOS era editor but does not aim to be a carbon copy. Hopefully most of the differences can be considered as improvements.
-
-Implementation is done using [SDL2](https://www.libsdl.org/).
+This editor was written from scratch by Ultimate Tapan Kaikki fans because the source code of the original DOS era editor has been lost.
+It's heavily inspired by the original editor but does not aim to be a carbon copy. Hopefully most of the differences can be considered as improvements.
 
 ![Cover image](./media/cover.png)
 
-## Features
+The editor runs on both desktop (using SDL2) and web browser (compiled to WASM from Rust).
 
-- :heavy_check_mark: Laying wall and floor tiles
-- :heavy_check_mark: Level size
-- :heavy_check_mark: Saving level
-- :heavy_check_mark: Loading level
-- :heavy_check_mark: Support all level file versions (<= 5)
-- :heavy_check_mark: Creating shadows
-- :heavy_check_mark: Setting player start positions
-- :heavy_check_mark: Spotlights
-- :heavy_check_mark: Steams
-- :heavy_check_mark: Static crates
-- :heavy_check_mark: Random crates
-- :heavy_check_mark: Single player enemies and time limit are configurable
-- :heavy_check_mark: Level comment is editable
-- :heavy_check_mark: Tile fill feature
-- :heavy_check_mark: Automated shadow creation
-- :x: Level minimap (very niche)
+👉👉 [Try the web version here](https://suomipelit.github.io/utk-level-editor-web) 👈👈
 
-## Improvement considerations
+Press F1 to see the help screen. To get inspiration, download [original game level files](https://github.com/suomipelit/ultimatetapankaikki/tree/master/LEVS) and open them in the editor by pressing F3.
 
-- Layout tweaks
-- Rendering optimizations by reducing texture creation of dynamic values
-- More accurate frame rate
-- Somehow make the options directly referenced in code instead of using workaround indexing
-- ...?
+## Running from source
+
+### Desktop
+
+* Install Rust toolchain
+* Install SDL2 and SDL2_image development libraries
+* Run `cargo run --release`
+
+### Web
+
+* Install Rust toolchain
+* Optional: Install [binaryen](https://github.com/WebAssembly/binaryen), which is used to optimize the WASM output size
+* Run `cd web; ./build.sh`
+* Serve files from `dist/` directory, e.g. `python3 -m http.server -d dist`, and open `index.html` in your browser
