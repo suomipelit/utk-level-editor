@@ -24,6 +24,7 @@ Press F1 to see the help screen. To get inspiration, download [original game lev
 ### Web
 
 * Install Rust toolchain
+* Install wasm-bindgen-cli: `cargo install wasm-bindgen-cli`
 * Optional: Install [binaryen](https://github.com/WebAssembly/binaryen), which is used to optimize the WASM output size
 * Run `cd web; ./build.sh`
 * Serve files from `dist/` directory, e.g. `python3 -m http.server -d dist`, and open `index.html` in your browser
