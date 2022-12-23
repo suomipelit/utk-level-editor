@@ -614,7 +614,9 @@ impl<W: LevelWriter> EditorState<W> {
                 _ => "F1 for help",
             }
         };
-        context.font.render_text(renderer, text, (8, 8));
+        context
+            .font
+            .render_text(renderer, text, (context.font.px(4), context.font.px(4)));
         self.render_prompt_if_needed(renderer, context);
         if self.insert_item == InsertType::None {
             if let Some(coordinates) = self.mouse_left_click {
