@@ -11,13 +11,6 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - name: Cargo cache
-        uses: actions/cache@v3
-        continue-on-error: false
-        with:
-          path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
       - run: cargo fmt --all --check
 
   build-desktop:
@@ -30,13 +23,6 @@ jobs:
         with:
           toolchain: stable
       - run: sudo apt-get install -y libsdl2-dev libsdl2-image-dev
-      - name: Cargo cache
-        uses: actions/cache@v3
-        continue-on-error: false
-        with:
-          path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
       - run: cargo build --release
 
   build-web:
@@ -53,13 +39,6 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
       - run: sudo apt-get install -y binaryen
-      - name: Cargo cache
-        uses: actions/cache@v3
-        continue-on-error: false
-        with:
-          path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
       - run: cargo install wasm-bindgen-cli
       - run: ./build.sh
 
