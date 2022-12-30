@@ -571,17 +571,18 @@ impl Level {
         )
     }
 
-    pub fn deserialize(&mut self, mut data: &[u8]) -> Result<(), DeserializationError> {
-        self.scroll = (0, 0);
-        self.spotlights.clear();
-        self.steams.clear();
-        self.general_info.comment = String::new();
-        self.general_info.enemy_table.fill(0);
-        self.crates.staticc = HashMap::new();
-        self.crates.random.normal.weapons.fill(0);
-        self.crates.random.normal.bullets.fill(0);
-        self.crates.random.deathmatch.weapons.fill(0);
-        self.crates.random.deathmatch.bullets.fill(0);
+    pub fn deserialize(mut data: &[u8]) -> Result<Level, DeserializationError> {
+        let mut level = Level::get_default_level((32, 22));
+        level.scroll = (0, 0);
+        level.spotlights.clear();
+        level.steams.clear();
+        level.general_info.comment = String::new();
+        level.general_info.enemy_table.fill(0);
+        level.crates.staticc = HashMap::new();
+        level.crates.random.normal.weapons.fill(0);
+        level.crates.random.normal.bullets.fill(0);
+        level.crates.random.deathmatch.weapons.fill(0);
+        level.crates.random.deathmatch.bullets.fill(0);
 
         let version: u32 = data.read_u32::<LittleEndian>()?;
 
@@ -617,19 +618,19 @@ impl Level {
             }
             tiles.push(row);
         }
-        self.tiles = tiles;
+        level.tiles = tiles;
 
-        self.p1_position.0 = data.read_u32::<LittleEndian>()?;
-        self.p1_position.1 = data.read_u32::<LittleEndian>()?;
-        self.p2_position.0 = data.read_u32::<LittleEndian>()?;
-        self.p2_position.1 = data.read_u32::<LittleEndian>()?;
+        level.p1_position.0 = data.read_u32::<LittleEndian>()?;
+        level.p1_position.1 = data.read_u32::<LittleEndian>()?;
+        level.p2_position.0 = data.read_u32::<LittleEndian>()?;
+        level.p2_position.1 = data.read_u32::<LittleEndian>()?;
 
         let spotlight_amount = data.read_u32::<LittleEndian>()?;
 
         for _ in 0..spotlight_amount {
             let spotlight_x = data.read_u32::<LittleEndian>()?;
             let spotlight_y = data.read_u32::<LittleEndian>()?;
-            self.spotlights.insert(
+            level.spotlights.insert(
                 (spotlight_x, spotlight_y),
                 data.read_u32::<LittleEndian>()? as u8,
             );
@@ -640,7 +641,7 @@ impl Level {
         for _ in 0..steam_amount {
             let steam_x = data.read_u32::<LittleEndian>()?;
             let steam_y = data.read_u32::<LittleEndian>()?;
-            self.steams.insert(
+            level.steams.insert(
                 (steam_x, steam_y),
                 Steam {
                     angle: data.read_u32::<LittleEndian>()? as u16,
@@ -652,11 +653,11 @@ impl Level {
         for _ in 0..20 {
             let c = data.read_u8()? as char;
             if c != '\0' {
-                self.general_info.comment.push(c);
+                level.general_info.comment.push(c);
             }
         }
 
-        self.general_info.time_limit = data.read_u32::<LittleEndian>()?;
+        level.general_info.time_limit = data.read_u32::<LittleEndian>()?;
 
         let number_of_enemy_types = if version >= 4 {
             DIFF_ENEMIES
@@ -664,7 +665,7 @@ impl Level {
             DIFF_ENEMIES - 1
         } as usize;
         for enemy_number in 0..number_of_enemy_types {
-            self.general_info.enemy_table[enemy_number] = data.read_u32::<LittleEndian>()?;
+            level.general_info.enemy_table[enemy_number] = data.read_u32::<LittleEndian>()?;
         }
 
         let number_of_weapons = if version == 1 {
@@ -675,7 +676,7 @@ impl Level {
             DIFF_WEAPONS
         } as usize;
         for weapon_number in 0..number_of_weapons {
-            self.crates.random.normal.weapons[weapon_number] = data.read_u32::<LittleEndian>()?;
+            level.crates.random.normal.weapons[weapon_number] = data.read_u32::<LittleEndian>()?;
         }
         let number_of_bullets = if version == 1 {
             DIFF_BULLETS - 2
@@ -685,49 +686,49 @@ impl Level {
             DIFF_BULLETS
         } as usize;
         for bullet_number in 0..number_of_bullets {
-            self.crates.random.normal.bullets[bullet_number] = data.read_u32::<LittleEndian>()?;
+            level.crates.random.normal.bullets[bullet_number] = data.read_u32::<LittleEndian>()?;
         }
-        self.crates.random.normal.energy = data.read_u32::<LittleEndian>()?;
+        level.crates.random.normal.energy = data.read_u32::<LittleEndian>()?;
 
         for weapon_number in 0..number_of_weapons {
-            self.crates.random.deathmatch.weapons[weapon_number] =
+            level.crates.random.deathmatch.weapons[weapon_number] =
                 data.read_u32::<LittleEndian>()?;
         }
         for bullet_number in 0..number_of_bullets {
-            self.crates.random.deathmatch.bullets[bullet_number] =
+            level.crates.random.deathmatch.bullets[bullet_number] =
                 data.read_u32::<LittleEndian>()?;
         }
-        self.crates.random.deathmatch.energy = data.read_u32::<LittleEndian>()?;
+        level.crates.random.deathmatch.energy = data.read_u32::<LittleEndian>()?;
 
         if version >= 5 {
-            Level::deserialize_crates(data, &mut self.crates.staticc, StaticCrate::Normal)?;
-            Level::deserialize_crates(data, &mut self.crates.staticc, StaticCrate::Deathmatch)?;
+            deserialize_crates(data, &mut level.crates.staticc, StaticCrate::Normal)?;
+            deserialize_crates(data, &mut level.crates.staticc, StaticCrate::Deathmatch)?;
         }
 
-        Ok(())
+        Ok(level)
+    }
+}
+
+fn deserialize_crates(
+    mut data: &[u8],
+    crates: &mut HashMap<Position, StaticCrateType>,
+    crate_variant: StaticCrate,
+) -> Result<(), DeserializationError> {
+    let number_of_crates = data.read_u32::<LittleEndian>()?;
+    for _crate_index in 0..number_of_crates {
+        let crate_item = StaticCrateType {
+            crate_variant,
+            crate_class: CrateClass::from_u32(data.read_u32::<LittleEndian>()?),
+            crate_type: data.read_u32::<LittleEndian>()? as u8,
+        };
+        crates.insert(
+            (
+                data.read_u32::<LittleEndian>()?,
+                data.read_u32::<LittleEndian>()?,
+            ),
+            crate_item,
+        );
     }
 
-    fn deserialize_crates(
-        mut data: &[u8],
-        crates: &mut HashMap<Position, StaticCrateType>,
-        crate_variant: StaticCrate,
-    ) -> Result<(), DeserializationError> {
-        let number_of_crates = data.read_u32::<LittleEndian>()?;
-        for _crate_index in 0..number_of_crates {
-            let crate_item = StaticCrateType {
-                crate_variant,
-                crate_class: CrateClass::from_u32(data.read_u32::<LittleEndian>()?),
-                crate_type: data.read_u32::<LittleEndian>()? as u8,
-            };
-            crates.insert(
-                (
-                    data.read_u32::<LittleEndian>()?,
-                    data.read_u32::<LittleEndian>()?,
-                ),
-                crate_item,
-            );
-        }
-
-        Ok(())
-    }
+    Ok(())
 }

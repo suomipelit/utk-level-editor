@@ -1,5 +1,6 @@
 use crate::context::Context;
 use crate::event::{Event, Keycode};
+use crate::level::Level;
 use crate::render::{Renderer, Texture};
 use crate::types::*;
 use crate::util::{get_bottom_text_position, get_title_position};
@@ -15,11 +16,15 @@ pub trait LevelLister {
 
 pub struct LoadLevelState {
     selected: usize,
+    invalid_file: bool,
 }
 
 impl LoadLevelState {
     pub fn new() -> Self {
-        LoadLevelState { selected: 0 }
+        LoadLevelState {
+            selected: 0,
+            invalid_file: false,
+        }
     }
 
     pub fn enter<L: LevelLister, T: Texture>(&mut self, context: &mut Context<L, T>) {
@@ -33,6 +38,10 @@ impl LoadLevelState {
         event: Event,
     ) -> EventResult {
         match event {
+            Event::KeyDown { .. } if self.invalid_file => {
+                self.invalid_file = false;
+                return EventResult::KeepMode;
+            }
             Event::Quit { .. }
             | Event::KeyDown {
                 keycode: Keycode::Escape,
@@ -57,14 +66,19 @@ impl LoadLevelState {
                 Keycode::Return | Keycode::KpEnter => {
                     if context.level_lister.len() > 0 {
                         let level_data = context.level_lister.load_level(self.selected);
-                        context.level.deserialize(&level_data).unwrap();
-                        let level_name = context.level_lister.level_name(self.selected).to_string();
-                        context.saved_level_name = Some(level_name.clone());
-                        context.level_save_name =
-                            level_name.strip_suffix(".LEV").unwrap().to_string();
+                        if let Ok(level) = Level::deserialize(&level_data) {
+                            context.level = level;
+                            let level_name =
+                                context.level_lister.level_name(self.selected).to_string();
+                            context.saved_level_name = Some(level_name.clone());
+                            context.level_save_name =
+                                level_name.strip_suffix(".LEV").unwrap().to_string();
+                            context.level_lister.reset();
+                            return EventResult::ChangeMode(Mode::Editor);
+                        } else {
+                            self.invalid_file = true;
+                        }
                     }
-                    context.level_lister.reset();
-                    return EventResult::ChangeMode(Mode::Editor);
                 }
                 _ => return EventResult::EventIgnored,
             },
@@ -83,27 +97,33 @@ impl LoadLevelState {
             .font
             .render_text(renderer, "LOAD LEVEL:", get_title_position(&context.font));
         let line_spacing = context.font.px(10);
-        for x in 0..context.level_lister.len() {
-            if self.selected == x {
+        if self.invalid_file {
+            context
+                .font
+                .render_text(renderer, "ERROR: Invalid level file!", text_position);
+        } else {
+            for x in 0..context.level_lister.len() {
+                if self.selected == x {
+                    context.font.render_text(
+                        renderer,
+                        "*",
+                        (
+                            text_position.0 - context.font.px(10),
+                            text_position.1 + context.font.px(1) + x as u32 * line_spacing,
+                        ),
+                    );
+                }
                 context.font.render_text(
                     renderer,
-                    "*",
-                    (
-                        text_position.0 - context.font.px(10),
-                        text_position.1 + context.font.px(1) + x as u32 * line_spacing,
-                    ),
+                    context.level_lister.level_name(x),
+                    (text_position.0, text_position.1 + line_spacing * x as u32),
                 );
             }
             context.font.render_text(
                 renderer,
-                context.level_lister.level_name(x),
-                (text_position.0, text_position.1 + line_spacing * x as u32),
+                "ENTER to select or ESC to exit",
+                get_bottom_text_position(&context.font, context.graphics.resolution_y),
             );
         }
-        context.font.render_text(
-            renderer,
-            "ENTER to select or ESC to exit",
-            get_bottom_text_position(&context.font, context.graphics.resolution_y),
-        );
     }
 }
