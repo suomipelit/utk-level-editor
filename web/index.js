@@ -69,23 +69,26 @@ export async function run() {
     )
     if (needsRender) renderFrame()
   })
-  canvas.addEventListener("mousedown", (event) => {
+  const mouseButton = (handler) => (event) => {
     const needsRender =
       event.button === 0
-        ? state.mouse_down(MouseButton.Left)
+        ? handler(MouseButton.Left)
         : event.button === 2
-        ? state.mouse_down(MouseButton.Right)
+        ? handler(MouseButton.Right)
         : false
     if (needsRender) renderFrame()
-  })
-  canvas.addEventListener("mouseup", (event) => {
-    const needsRender =
-      event.button === 0
-        ? state.mouse_up(MouseButton.Left)
-        : event.button === 2
-        ? state.mouse_up(MouseButton.Right)
-        : false
-    if (needsRender) renderFrame()
+  }
+  canvas.addEventListener(
+    "mousedown",
+    mouseButton((button) => state.mouse_down(button))
+  )
+  canvas.addEventListener(
+    "mouseup",
+    mouseButton((button) => state.mouse_up(button))
+  )
+  canvas.addEventListener("contextmenu", (event) => {
+    event.preventDefault()
+    return false
   })
 }
 
